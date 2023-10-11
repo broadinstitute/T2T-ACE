@@ -1,0 +1,26 @@
+@HD	VN:1.6
+@SQ	SN:chr10_MATERNAL	LN:135919641	M5:2c7674d487d8cfb28b321185e3d2be2c	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr11_MATERNAL	LN:135246310	M5:516942465c89c1046eafd85934863757	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr12_MATERNAL	LN:133587627	M5:0c035e7a071bd0304ec3d86f009f99b4	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr13_MATERNAL	LN:113347182	M5:c0ca1e4e343429fef1cfef7317c499e0	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr14_MATERNAL	LN:108662871	M5:75170c721f96db0144c73c93eb9548ff	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr15_MATERNAL	LN:100889208	M5:e13320882bbb0095faf0151d80c39c1a	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr16_MATERNAL	LN:90404941	M5:c68b95d71e6811a22349ded83d982c6d	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr17_MATERNAL	LN:83778943	M5:74002dec33365e8ed55f62ce127de410	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr18_MATERNAL	LN:78918644	M5:7e7aeddf3c581562b7d730fe65bf165d	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr19_MATERNAL	LN:61327774	M5:82ca19b0d0a5d0218f97d1737eeb5306	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr1_MATERNAL	LN:244030847	M5:17deb5189c8161ebe631c6a7e7f31276	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr20_MATERNAL	LN:66078614	M5:83cabf4f8f8ba5aa3707ab0e0d48ffc4	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr21_MATERNAL	LN:47319083	M5:dcd38ecae6b90d9eb7c582e326947bc9	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr22_MATERNAL	LN:53403895	M5:1bcca356f6cc4d9e7094eadf4be14134	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr2_MATERNAL	LN:242119507	M5:19974a7309b8f79e32951b60d7ad982c	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr3_MATERNAL	LN:201109713	M5:174b316de1e11a7b4cb0eb7cd2f74649	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr4_MATERNAL	LN:191686330	M5:6ced062ebaab9fc57d3db8a89009d556	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr5_MATERNAL	LN:183268655	M5:19b856eaa48767b59dba42287c08df03	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr6_MATERNAL	LN:174747926	M5:602c59051aff5578ef176f6ddaa68ef6	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr7_MATERNAL	LN:160965141	M5:a7cd2d47f9fef3cae01387571a56d513	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr8_MATERNAL	LN:146746789	M5:73b1a7e23e484af6f8e1e6d4b60cb6a2	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chr9_MATERNAL	LN:143809206	M5:72a4f47d5828aafbc4beb5ff8cb6dc94	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chrEBV	LN:173224	M5:09ffaee2afbe05f8008c19a4d3b6ea47	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chrX_MATERNAL	LN:154349183	M5:c209e6284ea67a0253531df818777ced	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
+@SQ	SN:chrY_PATERNAL	LN:62434272	M5:fed58757233b1c3560828fead7441123	UR:file:/Users/fleharty/resources/hg002v0.9.mat_Y_EBV_MT.fasta
