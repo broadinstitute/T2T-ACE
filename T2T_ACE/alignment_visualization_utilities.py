@@ -10,9 +10,9 @@ from collections import defaultdict
 
 # Import chrom size data for hg38 and HG002
 current_dir = os.path.dirname(os.path.abspath(__file__))
-hg38_chrom_size_filepath = os.path.join(current_dir, 'hg38_chrom_size.txt')
-hg002_mat_dict_filepath = os.path.join(current_dir, "hg002v0.9.mat_Y_EBV_MT.dict")
-hg002_pat_dict_filepath = os.path.join(current_dir, "hg002v0.9.pat_X_EBV_MT.dict")
+hg38_chrom_size_filepath = os.path.join(current_dir, '../resources/hg38_chrom_size.txt')
+hg002_mat_dict_filepath = os.path.join(current_dir, "../resources/hg002v0.9.mat_Y_EBV_MT.dict")
+hg002_pat_dict_filepath = os.path.join(current_dir, "../resources/hg002v0.9.pat_X_EBV_MT.dict")
 
 # Process/Extract chromo size data
 hg38_chrom_size_df = pd.read_csv(hg38_chrom_size_filepath, sep='\t', names=['chr','length'])
