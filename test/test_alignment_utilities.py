@@ -37,7 +37,3 @@ class TestSumCigarEvents:
     def test_invalid_input_types(self, cigar_str):
         with pytest.raises(TypeError):
             sum_cigar_events(cigar_str)
-
-
-
-
