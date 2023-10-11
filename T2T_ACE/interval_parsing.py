@@ -1,5 +1,6 @@
 from typing import Optional, Tuple, List, Dict
 from collections import defaultdict
+from bisect import bisect_right
 
 import logging
 
@@ -167,3 +168,49 @@ def closest_interval(target: str, interval_list: List[str]) -> List[str]:
 
     return closest_intervals
 
+
+def sort_intervals(intervals):
+    """
+    Sort a list of genomic intervals.
+
+    Args:
+        intervals (list): List of genomic intervals in string format.
+
+    Returns:
+        list: A list of sorted genomic intervals in tuple format.
+    """
+    parsed_intervals = [parse_interval(interval) for interval in intervals]
+    return sorted(parsed_intervals, key=lambda x: (x[0], x[1]))
+
+
+def find_next_interval(target, intervals):
+    """
+    Find the genomic interval immediately to the right of the target interval, if it exists.
+
+    The function first filters intervals based on the chromosome of the target, sorts them,
+    and then finds the interval that is immediately to the right of the target interval.
+
+    Args:
+        target (str): The target genomic interval in the format "chrX:start-end".
+        intervals (list): A list of genomic intervals in string format.
+
+    Returns:
+        str or None: The genomic interval immediately to the right of the target, or None if no such interval exists.
+
+    Example:
+        >>> find_next_interval("chr1:2342-4332", ["chr1:5000-6000", "chr1:1000-2000", "chr1:7000-8000"])
+        'chr1:5000-6000'
+    """
+    parsed_target = parse_interval(target)
+    target_chrom = parsed_target[0]
+
+    # Filter intervals by chromosome
+    filtered_intervals = [x for x in sort_intervals(intervals) if x[0] == target_chrom]
+
+    index = bisect_right(filtered_intervals, parsed_target)
+
+    if index >= len(filtered_intervals):
+        return None
+
+    next_interval = filtered_intervals[index]
+    return f"{next_interval[0]}:{next_interval[1]}-{next_interval[2]}"

@@ -1,5 +1,6 @@
 import pytest
-from T2T_ACE.interval_parsing import parse_interval, create_interval, closest_interval, find_overlapping_intervals
+from T2T_ACE.interval_parsing import (parse_interval, create_interval, closest_interval, find_overlapping_intervals,
+                                      sort_intervals, find_next_interval)
 
 
 class TestParseInterval:
@@ -100,3 +101,54 @@ class TestClosestInterval:
 
     def test_single_interval_different_chromosome(self):
         assert closest_interval("chr1:200-300", ["chr2:100-200"]) == []
+
+
+class TestSortIntervals:
+    def test_basic_sort(self):
+        intervals = ["chr1:5000-6000", "chr1:1000-2000"]
+        expected = [("chr1", 1000, 2000), ("chr1", 5000, 6000)]
+        assert sort_intervals(intervals) == expected
+
+    def test_same_chromosome_diff_position(self):
+        intervals = ["chr1:5000-6000", "chr1:1000-2000", "chr1:7000-8000"]
+        expected = [("chr1", 1000, 2000), ("chr1", 5000, 6000), ("chr1", 7000, 8000)]
+        assert sort_intervals(intervals) == expected
+
+    def test_multiple_chromosomes(self):
+        intervals = ["chr2:3000-4000", "chr1:1000-2000", "chr1:5000-6000"]
+        expected = [("chr1", 1000, 2000), ("chr1", 5000, 6000), ("chr2", 3000, 4000)]
+        assert sort_intervals(intervals) == expected
+
+    def test_empty_list(self):
+        assert sort_intervals([]) == []
+
+    def test_single_interval(self):
+        intervals = ["chr1:1000-2000"]
+        expected = [("chr1", 1000, 2000)]
+        assert sort_intervals(intervals) == expected
+
+
+class TestFindNextInterval:
+    def setup_class(self):
+        self.intervals_list = ["chr1:5000-6000", "chr1:1000-2000", "chr1:7000-8000", "chr2:3000-4000"]
+
+    def test_immediate_next(self):
+        assert find_next_interval("chr1:2342-4332", self.intervals_list) == "chr1:5000-6000"
+
+    def test_no_next_interval(self):
+        assert find_next_interval("chr1:9000-10000", self.intervals_list) is None
+
+    def test_same_chromosome_diff_position(self):
+        assert find_next_interval("chr1:4000-4500", self.intervals_list) == "chr1:5000-6000"
+
+    def test_multiple_chromosomes(self):
+        assert find_next_interval("chr2:2000-2500", self.intervals_list) == "chr2:3000-4000"
+
+    def test_exact_match_next(self):
+        assert find_next_interval("chr1:5000-6000", self.intervals_list) == "chr1:7000-8000"
+
+    def test_empty_list(self):
+        assert find_next_interval("chr1:4000-4500", []) is None
+
+    def test_diff_chromosomes(self):
+        assert find_next_interval("chr3:1000-2000", self.intervals_list) is None
