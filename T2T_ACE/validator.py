@@ -2,10 +2,10 @@ import logging
 
 import mappy
 
-from interval_parsing import create_interval
-from genomic_queries import get_sequence_from_interval, get_flanking_regions, get_region_around_deletion
-from interval_parsing import parse_interval
-import alignment_utilities as au
+from T2T_ACE.interval_parsing import create_interval
+from T2T_ACE.genomic_queries import get_sequence_from_interval, get_flanking_regions, get_region_around_deletion
+from T2T_ACE.interval_parsing import parse_interval
+import T2T_ACE.alignment_utilities as au
 
 
 
