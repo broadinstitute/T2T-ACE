@@ -157,14 +157,14 @@ def get_flanking_pairs(interval, calling_reference_fasta: str, called_ref_aligne
         for flanking_alignment in flanking_alignments["left_ref_flank"]:
             next_interval = find_next_interval(flanking_alignment, flanking_alignments["right_ref_flank"])
             if next_interval is not None:
-                in_between = interval_between_intervals(flanking_alignment, next_interval)
-                print(flanking_alignment, next_interval, in_between, distance_between_intervals(flanking_alignment, next_interval))
+                #in_between = interval_between_intervals(flanking_alignment, next_interval)
+                print(flanking_alignment, next_interval, distance_between_intervals(flanking_alignment, next_interval))
 
         for flanking_alignment in flanking_alignments["left_truth_flank"]:
             next_interval = find_next_interval(flanking_alignment, flanking_alignments["right_truth_flank"])
             if next_interval is not None:
-                in_between = interval_between_intervals(flanking_alignment, next_interval)
-                print(flanking_alignment, next_interval, in_between, distance_between_intervals(flanking_alignment, next_interval))
+                #in_between = interval_between_intervals(flanking_alignment, next_interval)
+                print(flanking_alignment, next_interval, distance_between_intervals(flanking_alignment, next_interval))
     except:
         raise ValueError("No flanking alignments found")
 
