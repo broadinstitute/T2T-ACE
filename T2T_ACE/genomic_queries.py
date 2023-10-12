@@ -114,3 +114,4 @@ def get_flanking_regions(reference_fasta: str, interval: str, padding: int = 50)
     right = get_sequence_from_interval(reference_fasta, f"{chrom}:{end+1}-{end+padding}")
 
     return left, right
+

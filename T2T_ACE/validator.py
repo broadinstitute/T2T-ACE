@@ -4,9 +4,9 @@ import mappy
 
 from T2T_ACE.interval_parsing import create_interval
 from T2T_ACE.genomic_queries import get_sequence_from_interval, get_flanking_regions, get_region_around_deletion
-from T2T_ACE.interval_parsing import parse_interval
+from T2T_ACE.interval_parsing import (parse_interval, find_next_interval,
+                                      distance_between_intervals, interval_between_intervals)
 import T2T_ACE.alignment_utilities as au
-
 
 
 def log_error(level, msg, *args):
@@ -104,7 +104,7 @@ def check_interval(interval, calling_reference_fasta: str, called_ref_aligner, t
     hg002_joined_count = [au.is_good_hit(_, len(joined_sequence))
                           for _ in truth_ref_aligner.map(joined_sequence)].count(True)
 
-    left_flank, right_flank = get_flanking_regions(calling_reference_fasta, interval, padding=500)
+    left_flank, right_flank = get_flanking_regions(calling_reference_fasta, interval, padding=5000)
     left_flank_hg38_hits = [_ for _ in called_ref_aligner.map(left_flank)]
     left_flank_hg002t2t_hits = [_ for _ in truth_ref_aligner.map(left_flank)]
 
@@ -147,3 +147,25 @@ def align_flanking_sequences(interval, calling_reference_fasta: str, called_ref_
             "left_truth_flank": left_flank_hg002t2t_hits,
             "right_ref_flank": right_flank_hg38_hits,
             "right_truth_flank": right_flank_hg002t2t_hits}
+
+
+def get_flanking_pairs(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner):
+    flanking_alignments = align_flanking_sequences(interval, calling_reference_fasta,
+                                                   called_ref_aligner, truth_ref_aligner)
+
+    try:
+        for flanking_alignment in flanking_alignments["left_ref_flank"]:
+            next_interval = find_next_interval(flanking_alignment, flanking_alignments["right_ref_flank"])
+            if next_interval is not None:
+                in_between = interval_between_intervals(flanking_alignment, next_interval)
+                print(flanking_alignment, next_interval, in_between, distance_between_intervals(flanking_alignment, next_interval))
+
+        for flanking_alignment in flanking_alignments["left_truth_flank"]:
+            next_interval = find_next_interval(flanking_alignment, flanking_alignments["right_truth_flank"])
+            if next_interval is not None:
+                in_between = interval_between_intervals(flanking_alignment, next_interval)
+                print(flanking_alignment, next_interval, in_between, distance_between_intervals(flanking_alignment, next_interval))
+    except:
+        raise ValueError("No flanking alignments found")
+
+
