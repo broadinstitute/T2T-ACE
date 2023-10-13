@@ -81,7 +81,8 @@ def evaluate_deletion(calling_reference: str, truth_reference: str, interval: st
     return [hg38_hits, hg002t2t_hits]
 
 
-def check_interval(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, upper_bound=1000000):
+def check_interval(interval: str, calling_reference_fasta: str,
+                   called_ref_aligner: mappy.Aligner, truth_ref_aligner: mappy.Aligner, upper_bound=1e6):
     _, start, stop = parse_interval(interval)
 
     raw_sequence = get_sequence_from_interval(calling_reference_fasta, interval)
@@ -157,13 +158,13 @@ def get_flanking_pairs(interval, calling_reference_fasta: str, called_ref_aligne
         for flanking_alignment in flanking_alignments["left_ref_flank"]:
             next_interval = find_next_interval(flanking_alignment, flanking_alignments["right_ref_flank"])
             if next_interval is not None:
-                #in_between = interval_between_intervals(flanking_alignment, next_interval)
+                # in_between = interval_between_intervals(flanking_alignment, next_interval)
                 print(flanking_alignment, next_interval, distance_between_intervals(flanking_alignment, next_interval))
 
         for flanking_alignment in flanking_alignments["left_truth_flank"]:
             next_interval = find_next_interval(flanking_alignment, flanking_alignments["right_truth_flank"])
             if next_interval is not None:
-                #in_between = interval_between_intervals(flanking_alignment, next_interval)
+                # in_between = interval_between_intervals(flanking_alignment, next_interval)
                 print(flanking_alignment, next_interval, distance_between_intervals(flanking_alignment, next_interval))
     except:
         raise ValueError("No flanking alignments found")
