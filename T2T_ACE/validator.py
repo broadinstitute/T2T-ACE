@@ -154,19 +154,27 @@ def get_flanking_pairs(interval, calling_reference_fasta: str, called_ref_aligne
     flanking_alignments = align_flanking_sequences(interval, calling_reference_fasta,
                                                    called_ref_aligner, truth_ref_aligner)
 
+    stuff = {}
     try:
+        stuff["ref_flank"] = []
         for flanking_alignment in flanking_alignments["left_ref_flank"]:
             next_interval = find_next_interval(flanking_alignment, flanking_alignments["right_ref_flank"])
             if next_interval is not None:
                 # in_between = interval_between_intervals(flanking_alignment, next_interval)
                 print(flanking_alignment, next_interval, distance_between_intervals(flanking_alignment, next_interval))
+                stuff["ref_flank"].append((flanking_alignment, next_interval, distance_between_intervals(flanking_alignment, next_interval)))
 
+        stuff["truth_flank"] = []
         for flanking_alignment in flanking_alignments["left_truth_flank"]:
             next_interval = find_next_interval(flanking_alignment, flanking_alignments["right_truth_flank"])
             if next_interval is not None:
                 # in_between = interval_between_intervals(flanking_alignment, next_interval)
                 print(flanking_alignment, next_interval, distance_between_intervals(flanking_alignment, next_interval))
+                stuff["truth_flank"].append((flanking_alignment, next_interval, distance_between_intervals(flanking_alignment, next_interval)))
+
+
     except:
         raise ValueError("No flanking alignments found")
 
+    return stuff
 

@@ -1,6 +1,5 @@
 import os
 import pytest
-from unittest.mock import patch
 
 from T2T_ACE.genomic_queries import get_sequence_from_interval, get_flanking_regions
 

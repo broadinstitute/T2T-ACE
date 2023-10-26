@@ -7,7 +7,6 @@ import numpy as np
 from collections import defaultdict
 
 
-
 # Import chrom size data for hg38 and HG002
 current_dir = os.path.dirname(os.path.abspath(__file__))
 hg38_chrom_size_filepath = os.path.join(current_dir, '../resources/hg38_chrom_size.txt')
