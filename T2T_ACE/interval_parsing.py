@@ -214,3 +214,101 @@ def find_next_interval(target, intervals):
 
     next_interval = filtered_intervals[index]
     return f"{next_interval[0]}:{next_interval[1]}-{next_interval[2]}"
+
+
+def distance_between_intervals(interval1: str, interval2: str) -> int:
+    """
+    Find the distance between two genomic intervals.
+
+    The distance between two intervals is defined as follows:
+    - For non-overlapping intervals, it's the minimum distance between any two positions in the two intervals.
+    - For overlapping intervals, the distance is negative and indicates the size of the overlap.
+
+    Args:
+        interval1 (str): The first genomic interval in the format "chrX:start-end".
+        interval2 (str): The second genomic interval in the format "chrX:start-end".
+
+    Returns:
+        int: The distance between the two intervals. Negative if overlapping.
+
+    Raises:
+        ValueError: If the intervals are not on the same chromosome.
+
+    Example:
+        >>> distance_between_intervals("chr1:100-200", "chr1:300-400")
+        99
+        >>> distance_between_intervals("chr1:100-200", "chr1:200-300")
+        -1
+    """
+    if interval1 is None or interval2 is None:
+        return 0
+
+    parsed_interval1 = parse_interval(interval1)
+    parsed_interval2 = parse_interval(interval2)
+
+    if parsed_interval1[0] != parsed_interval2[0]:
+        raise ValueError("Intervals must be on the same chromosome")
+
+    start1, end1 = parsed_interval1[1], parsed_interval1[2]
+    start2, end2 = parsed_interval2[1], parsed_interval2[2]
+
+    if start1 > end2:
+        return start1 - end2 - 1
+    elif start2 > end1:
+        return start2 - end1 - 1
+    else:
+        overlap_start = max(start1, start2)
+        overlap_end = min(end1, end2)
+        return overlap_start - overlap_end - 1  # Negative value for overlap
+
+
+def interval_size(interval: str) -> int:
+    """
+    Returns the size of the interval.
+
+    Args:
+        interval (str): The genomic interval in the format "chrX:start-end".
+
+    Returns:
+        int: The size of the interval.
+    """
+    chrom, start, end = parse_interval(interval)
+    return end - start + 1
+
+
+def interval_between_intervals(interval1: str, interval2: str) -> str:
+    """
+    Constructs the genomic interval that lies between two non-overlapping intervals.
+
+    Args:
+        interval1 (str): The first genomic interval in the format "chrX:start-end".
+        interval2 (str): The second genomic interval in the format "chrX:start-end".
+
+    Returns:
+        str: The genomic interval that lies between the two given intervals.
+
+    Raises:
+        ValueError: If the intervals are not on the same chromosome or are overlapping.
+
+    Example:
+        >>> interval_between_intervals("chr1:100-200", "chr1:300-400")
+        "chr1:201-299"
+    """
+    chrom1, start1, end1 = parse_interval(interval1)
+    chrom2, start2, end2 = parse_interval(interval2)
+
+    if chrom1 != chrom2:
+        raise ValueError("Intervals must be on the same chromosome")
+
+    chr_name = chrom1
+
+    if start1 - end2 == 1 or start2 - end1 == 1:
+        raise ValueError("Intervals should not be touching")
+
+    if start1 > end2:
+        return f"{chr_name}:{end2 + 1}-{start1 - 1}"
+    elif start2 > end1:
+        return f"{chr_name}:{end1 + 1}-{start2 - 1}"
+    else:
+        raise ValueError("Intervals should not be overlapping")
+

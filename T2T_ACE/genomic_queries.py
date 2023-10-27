@@ -26,33 +26,28 @@ def get_sequence_from_interval(reference_fasta: str, interval: str) -> Optional[
     get_sequence_from_interval("hg38.fasta", "chr1:-1, 300")  # Raises ValueError
     get_sequence_from_interval("hg38.fasta", "chr1:200-1000000")  # Raises IndexError
     """
-
     try:
         # Split the interval into chromosome, start, and end
         chrom, start, end = parse_interval(interval)
+    except (ValueError, IndexError, TypeError) as e:
+        logging.error(f"Error: Malformed input or could not convert data: {e}")
+        raise e
 
+    try:
         with pysam.FastaFile(reference_fasta) as ref_genome:
             # Fetch the sequence
             sequence = ref_genome.fetch(chrom, start-1, end)
+    except KeyError:
+        logging.error(f"Error: Chromosome {chrom} not found in reference genome.")
+        raise KeyError(f"Chromosome {chrom} not found in reference genome.")
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        raise e
 
-        return sequence
+    if len(sequence) < (end - start + 1):
+        raise IndexError(f"Interval {interval} is out of bounds for the given chromosome.")
 
-    except KeyError as e:  # Catching errors related to chromosome name
-        logging.exception("Error in fetching sequence", extra={'interval': interval, 'reference_fasta': reference_fasta})
-        return None
-
-    except IndexError as e:
-        print("Index Error")
-        logging.exception("Error in fetching sequence", extra={'interval': interval, 'reference_fasta': reference_fasta})
-        raise
-
-    except ValueError as e:  # Catching errors related to splitting and conversion to int
-        logging.error(f"Error: Malformed input or could not convert data: {e}")
-        return None
-
-    except IOError as e:  # Catching errors related to file operations
-        logging.error(f"Error: Failed to open or read the file: {e}")
-        raise
+    return sequence
 
 
 def get_region_around_deletion(reference_fasta: str, interval: str, padding: int = 50) -> str:
@@ -108,9 +103,12 @@ def get_flanking_regions(reference_fasta: str, interval: str, padding: int = 50)
     get_flanking_regions("chr1", -1, 300, 50)  # Raises ValueError
     get_flanking_regions("chr1", 200, 1000000, 50)  # Raises IndexError
     """
+    if padding < 0:
+        raise ValueError("Padding must be a positive integer.")
 
     chrom, start, end = parse_interval(interval)
     left = get_sequence_from_interval(reference_fasta, f"{chrom}:{start-padding}-{start-1}")
     right = get_sequence_from_interval(reference_fasta, f"{chrom}:{end+1}-{end+padding}")
 
     return left, right
+
