@@ -1,6 +1,7 @@
 import pytest
 from T2T_ACE.interval_parsing import (parse_interval, create_interval, closest_interval, find_overlapping_intervals,
-                                      sort_intervals, find_next_interval)
+                                      sort_intervals, find_next_interval, distance_between_intervals,
+                                      interval_between_intervals)
 
 
 class TestParseInterval:
@@ -152,3 +153,42 @@ class TestFindNextInterval:
 
     def test_diff_chromosomes(self):
         assert find_next_interval("chr3:1000-2000", self.intervals_list) is None
+
+
+class TestDistanceBetweenIntervals:
+
+    def test_same_chr_non_overlapping(self):
+        assert distance_between_intervals("chr1:100-200", "chr1:300-400") == 99
+
+    def test_same_chr_overlapping(self):
+        assert distance_between_intervals("chr1:100-250", "chr1:250-300") == -1
+        assert distance_between_intervals("chr1:100-250", "chr1:200-300") == -51
+
+    def test_same_chr_touching(self):
+        assert distance_between_intervals("chr1:100-199", "chr1:200-300") == 0
+        assert distance_between_intervals("chr1:200-300", "chr1:100-199") == 0
+
+    def test_different_chr(self):
+        with pytest.raises(ValueError):
+            distance_between_intervals("chr1:100-200", "chr2:300-400")
+
+
+class TestIntervalBetweenIntervals:
+
+    def test_same_chr_non_overlapping(self):
+        assert interval_between_intervals("chr1:100-200", "chr1:300-400") == "chr1:201-299"
+        assert interval_between_intervals("chr1:300-400", "chr1:100-200") == "chr1:201-299"
+
+    def test_same_chr_overlapping(self):
+        with pytest.raises(ValueError):
+            interval_between_intervals("chr1:100-250", "chr1:200-300")
+
+    def test_same_chr_touching(self):
+        with pytest.raises(ValueError):
+            interval_between_intervals("chr1:100-199", "chr1:200-300")
+        with pytest.raises(ValueError):
+            interval_between_intervals("chr1:200-300", "chr1:100-199")
+
+    def test_different_chr(self):
+        with pytest.raises(ValueError):
+            interval_between_intervals("chr1:100-200", "chr2:300-400")
