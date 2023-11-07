@@ -42,10 +42,11 @@ pat_chr_size_df.sort_values('chr', key=lambda column: column.map(lambda e: pat_c
 
 class PlotIntervals:
     def __init__(self, hg38_interval_list, hg002_interval_list):
+        # plot interval class assumes the first hg38 interval is the event interval
         self.hg38_interval_list = hg38_interval_list
         self.hg002_interval_list = hg002_interval_list
 
-    def plot_interval_on_chromo(self):
+    def chromosome_karyotype_plot(self):
         hg002_mat_interval_list = [i for i in self.hg002_interval_list if 'MATERNAL' in i]
         hg002_pat_interval_list = [i for i in self.hg002_interval_list if 'PATERNAL' in i]
         sns.set_style("white")
@@ -159,12 +160,12 @@ class PlotIntervals:
         start, end = map(int, parts[1].split('-'))
         return chromosome, start, end
 
-    def plot_interval_single_chrom(self, ratio=6, fig_height=12):
+    def plot_intervals_comparison(self, ratio=6, fig_height=12, flanking=False):
         hg002_mat_interval_list = [i for i in self.hg002_interval_list if 'MATERNAL' in i]
         hg002_pat_interval_list = [i for i in self.hg002_interval_list if 'PATERNAL' in i]
 
         # Calculate event length to determine
-        event_chromosome, event_start, event_end  = self.parse_interval(self.hg38_interval_list[0])
+        event_chromosome, event_start, event_end = self.parse_interval(self.hg38_interval_list[0])
         event_length = abs(event_end-event_start)
 
         # Ratio is used to determine the event length and x axis length
@@ -178,28 +179,34 @@ class PlotIntervals:
         default_length = default_end - default_start
 
         # Get a colormap for mat
-        hg38_colormap = cm.Set3
+        hg38_colormap = cm.Paired
         # Normalize to mat interval count
         hg38_norm = plt.Normalize(0, len(self.hg38_interval_list))
 
         # Get hg38 median interval to determine x lim
-        median_hg38_chr, median_hg38_start, median_hg38_end = self.parse_interval(sorted(
-            self.hg38_interval_list,
-            key=lambda x: self.parse_interval(x)[1])[int(round(len(self.hg38_interval_list)/2, 0))-1])
+        median_hg38_chr, median_hg38_start, median_hg38_end = self.parse_interval(sorted(self.hg38_interval_list, key=lambda x: self.parse_interval(x)[1])[int(round(len(self.hg38_interval_list)/2,0))-1])
         hg38_center = (median_hg38_start+median_hg38_end)/2
         hg38_start = hg38_center-x_axis_length/2
         hg38_end = hg38_center+x_axis_length/2
         # Plot Chrom
-        ax1.plot([hg38_start,hg38_end],[0,0], linewidth=5, color="gray", alpha=0.5)
+        ax1.plot([hg38_start,hg38_end],[0,0], linewidth=5, color="gray",alpha=0.5)
         # Plot Each Interval
         for i, interval_str in enumerate(sorted(self.hg38_interval_list, key=lambda x: self.parse_interval(x)[1])):
             chromosome, start, end = self.parse_interval(interval_str)
+            if i == 1:
+                # Plot event interval
+                ax1.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color='black')
+                # Offset the annotate text to the left
+                ax1.annotate(f'{event_length}bp', xy=((start+end)/2, 0), xytext=(((start+end)/2)-event_length*0.15, 0.1), fontsize=30, fontweight='bold')
+            # Plot Left Flanking Region
+            elif i ==2:
+                ax1.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=hg38_colormap(hg38_norm(i-1)))
+            # Plot Right Flanking Region
+            else:
+                ax1.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=hg38_colormap(hg38_norm(i)))
 
-            # Plot a line for the interval
-            ax1.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt',
-                     label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=hg38_colormap(hg38_norm(i)))
 
-        ax1.set_yticks([0], ["hg38"], fontweight='bold',fontsize=25)
+        ax1.set_yticks([0], ["hg38"], fontweight='bold',fontsize=28)
         ax1.set_ylim([-1,1])
         ax1.set_xlabel('')
         ax1.set_xlim([hg38_start,hg38_end])
@@ -215,27 +222,43 @@ class PlotIntervals:
             mat_start = default_start
             mat_end = default_end
         else:
-            # Get hg2 mat median interval to determine x lim
-            median_mat_chr, median_mat_start, median_mat_end = (
-                self.parse_interval(sorted(hg002_mat_interval_list, key=lambda x: self.parse_interval(x)[1])[int(round(len(hg002_mat_interval_list)/2, 0))-1]))
-            mat_center = (median_mat_start+median_mat_end)/2
+            # Get the center of hg2 mat intervals to determine x lim
+            mat_left_end_interval_pos = self.parse_interval(sorted(hg002_mat_interval_list, key=lambda x: self.parse_interval(x)[1])[0])[1]
+            mat_right_end_interval_end = self.parse_interval(sorted(hg002_mat_interval_list, key=lambda x: self.parse_interval(x)[1])[-1])[2]
+
+            mat_center = (mat_left_end_interval_pos+mat_right_end_interval_end)/2
             mat_start = mat_center-x_axis_length/2
             mat_end = mat_center+x_axis_length/2
         # Plot Chrom
-        ax2.plot([mat_start,mat_end], [0, 0], linewidth=5, color="gray",alpha=0.5)
+        ax2.plot([mat_start,mat_end],[0,0], linewidth=5, color="gray",alpha=0.5)
         # Plot Each Interval
         for i, interval_str in enumerate(sorted(hg002_mat_interval_list, key=lambda x: self.parse_interval(x)[1])):
             chromosome, start, end = self.parse_interval(interval_str)
 
-            # Plot a line for the interval
-            ax2.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt',
-                     label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=mat_colormap(mat_norm(i)))
+            # Plot a line for the interval (if flanking use hg38 colormap to match flanking color code)
+            if flanking:
+                ax2.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=hg38_colormap(hg38_norm(i)))
+            else:
+                ax2.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=mat_colormap(mat_norm(i)))
 
-        ax2.set_yticks([0], ["hg002_mat"], fontweight='bold',fontsize=25)
-        ax2.set_ylim([-1, 1])
+
+        ax2.set_yticks([0], ["hg002_mat"], fontweight='bold',fontsize=28)
+        ax2.set_ylim([-1,1])
         ax2.set_xlabel('')
-        ax2.set_xlim([mat_start, mat_end])
+        ax2.set_xlim([mat_start,mat_end])
         ax2.set_xticks([])
+        # If flanking, add distance between the left and right flanking region
+        if flanking:
+            # Get the end of the LFR
+            mat_LRF_end = self.parse_interval(sorted(hg002_mat_interval_list, key=lambda x: self.parse_interval(x)[1])[0])[2]
+            mat_RRF_start = self.parse_interval(sorted(hg002_mat_interval_list, key=lambda x: self.parse_interval(x)[1])[1])[1]
+            # Calculate the distance between the two
+            if mat_LRF_end == mat_RRF_start:
+                mat_flanking_distance = 0
+            else:
+                mat_flanking_distance = mat_RRF_start-mat_LRF_end -1
+            # Annotate the distance between the two flanking regions
+            ax2.annotate(f'{mat_flanking_distance}bp', xy=((mat_LRF_end + mat_RRF_start) / 2, 0), xytext=(((mat_LRF_end + mat_RRF_start)/2)-mat_flanking_distance*0.15 , 0.1), fontsize=30, fontweight='bold')
 
         # Normalize to mat interval count
         # Get a colormap
@@ -247,10 +270,11 @@ class PlotIntervals:
             pat_start = default_start
             pat_end = default_end
         else:
-            median_pat_chr, median_pat_start, median_pat_end = self.parse_interval(
-                sorted(hg002_pat_interval_list,
-                       key=lambda x: self.parse_interval(x)[1])[int(round(len(hg002_pat_interval_list)/2, 0))-1])
-            pat_center = (median_pat_start+median_pat_end)/2
+            # Get the center of hg2 pat intervals to determine x lim
+            pat_left_end_interval_pos = self.parse_interval(sorted(hg002_pat_interval_list, key=lambda x: self.parse_interval(x)[1])[0])[1]
+            pat_right_end_interval_end = self.parse_interval(sorted(hg002_pat_interval_list, key=lambda x: self.parse_interval(x)[1])[-1])[2]
+
+            pat_center = (pat_left_end_interval_pos + pat_right_end_interval_end) / 2
             pat_start = pat_center-x_axis_length/2
             pat_end = pat_center+x_axis_length/2
         # Plot Chrom
@@ -259,29 +283,46 @@ class PlotIntervals:
         for i, interval_str in enumerate(sorted(hg002_pat_interval_list, key=lambda x: self.parse_interval(x)[1])):
             chromosome, start, end = self.parse_interval(interval_str)
 
-            # Plot a line for the interval
-            ax3.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt',
-                     label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=pat_colormap(pat_norm(i)))
+            # Plot a line for the interval (if flanking use hg38 colormap to match flanking color code)
+            if flanking:
+                ax3.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=hg38_colormap(hg38_norm(i)))
+            else:
+                ax3.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=pat_colormap(pat_norm(i)))
 
-        ax3.set_yticks([0], ["hg002_pat"], fontweight='bold', fontsize=25)
-        ax3.set_ylim([-1, 1])
+
+        ax3.set_yticks([0], ["hg002_pat"], fontweight='bold',fontsize=28)
+        ax3.set_ylim([-1,1])
         ax3.set_xlabel('')
         ax3.set_xlim([pat_start,pat_end])
         ax3.set_xticks([])
+        # If flanking, add distance between the left and right flanking region
+        if flanking:
+            # Get the end of the LFR
+            pat_LRF_end = self.parse_interval(sorted(hg002_pat_interval_list, key=lambda x: self.parse_interval(x)[1])[0])[2]
+            pat_RRF_start = self.parse_interval(sorted(hg002_pat_interval_list, key=lambda x: self.parse_interval(x)[1])[1])[1]
+            # Calculate the distance between the two
+            if pat_LRF_end == pat_RRF_start:
+                pat_flanking_distance = 0
+            else:
+                pat_flanking_distance = pat_RRF_start-pat_LRF_end-1
+            # Annotate the distance between the two flanking regions
+            ax3.annotate(f'{pat_flanking_distance}bp', xy=((pat_LRF_end + pat_RRF_start) / 2, 0), xytext=(((pat_LRF_end + pat_RRF_start)/2)-pat_flanking_distance*0.15 , 0.1), fontsize=30, fontweight='bold')
 
         # Adding legends for the coordinates
-        legend1 = ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=25)
-        legend1.set_title("hg38 Copies", prop={"size": 25, "weight": "bold"})
-        legend2 = ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=25)
-        legend2.set_title("HG002 Maternal Copies", prop={"size": 25, "weight": "bold"})
-        legend3 = ax3.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=25)
-        legend3.set_title("HG002 Paternal Copies", prop={"size": 25, "weight": "bold"})
+        legend1 = ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=28)
+        legend1.set_title("hg38", prop={"size": 25, "weight": "bold"})
+        legend2 = ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=28)
+        legend2.set_title("HG002 Maternal", prop={"size": 25, "weight": "bold"})
+        legend3 = ax3.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=28)
+        legend3.set_title("HG002 Paternal", prop={"size": 25, "weight": "bold"})
 
         # Adjust layout to fit legend
         plt.tight_layout(rect=[0, 0, 0.85, 1])
 
-        plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=1)
-        plt.savefig(f"{self.hg38_interval_list[0]}_zoomin.png", dpi=300)
+        plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.9)
+
+        plt.savefig(f"{self.hg38_interval_list[0]}_interval_comparison.png",dpi=600)
+
 
 
 def compute_dot_matrix(seq1: str, seq2: str, k: int) -> tuple:
@@ -313,3 +354,4 @@ def dot_plot(seq1: str, seq2: str, seq1_name: str = "Sequence 1", seq2_name: str
 
     coords_x, coords_y = compute_dot_matrix(seq1, seq2, k)
     plot_dot_matrix(coords_x, coords_y, seq1_name, seq2_name)
+

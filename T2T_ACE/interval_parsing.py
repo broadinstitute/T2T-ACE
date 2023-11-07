@@ -239,10 +239,12 @@ def distance_between_intervals(interval1: str, interval2: str) -> int:
         99
         >>> distance_between_intervals("chr1:100-200", "chr1:200-300")
         -1
+        yg_update: I think this is wrong. Should be 0
     """
     if interval1 is None or interval2 is None:
         return 0
 
+    #parse_interval(sorted([interval1,interval2], key=lambda x: parse_interval(x)[1]))
     parsed_interval1 = parse_interval(interval1)
     parsed_interval2 = parse_interval(interval2)
 
