@@ -1,5 +1,5 @@
 import mappy as mp
-import T2T_ACE.cnv_evaluation as cnv_evaluation
+import T2T_ACE.cnv_alignments as cnv_alignments
 
 import T2T_ACE.alignment_utilities as au
 from T2T_ACE.genomic_queries import get_sequence_from_interval, get_flanking_regions
@@ -37,7 +37,7 @@ class CNVEvaluator:
         """
         return f"CNV Location: {self.location}, Type: {self.cnv_type}, Genotype: {self.genotype}"
 
-    def evaluate_region(self, interval: str, cnv_type: str, genotype: str) -> cnv_evaluation.CNVEvaluation:
+    def align_cnv_for_evaluation(self, interval: str, cnv_type: str, genotype: str) -> cnv_alignments.CNVAlignments:
         """
         Evaluates a CNV region.
 
@@ -62,7 +62,7 @@ class CNVEvaluator:
         right_flank_maternal_hits = [_ for _ in self.maternal_aligner.map(right_flank)]
         right_flank_paternal_hits = [_ for _ in self.paternal_aligner.map(right_flank)]
 
-        evaluation = cnv_evaluation.CNVEvaluation(interval,
+        alignments = cnv_alignments.CNVAlignments(interval,
                                                   cnv_type,
                                                   genotype,
                                                   calling_reference_hits,
@@ -75,6 +75,6 @@ class CNVEvaluator:
                                                   right_flank_maternal_hits,
                                                   right_flank_paternal_hits)
 
-        return evaluation
+        return alignments
 
 # %%

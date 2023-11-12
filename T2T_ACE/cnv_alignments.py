@@ -2,7 +2,7 @@ import mappy as mp
 from typing import List
 
 
-class CNVEvaluation:
+class CNVAlignments:
 
     location: str
     cnv_type: str
@@ -29,7 +29,7 @@ class CNVEvaluation:
                  right_flank_maternal_hits: List[mp.Alignment],
                  right_flank_paternal_hits: List[mp.Alignment]):
         """
-        Initializes a CNVEvaluation instance.
+        Initializes a CNVAlignments instance.
 
         Parameters:
         location (str): Location of the CNV.
@@ -52,6 +52,6 @@ class CNVEvaluation:
 
     def __str__(self):
         """
-        String representation of the CNVEvaluation.
+        String representation of the CNVAlignments.
         """
         return f"CNV Location: {self.location}, Type: {self.cnv_type}, Genotype: {self.genotype}"
