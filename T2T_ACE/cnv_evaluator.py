@@ -1,9 +1,11 @@
 import mappy as mp
+import T2T_ACE.cnv_evaluation as cnv_evaluation
+
 import T2T_ACE.alignment_utilities as au
+from T2T_ACE.genomic_queries import get_sequence_from_interval, get_flanking_regions
 
 
-class CNV_Evaluator:
-
+class CNVEvaluator:
     calling_reference: str
     maternal_reference: str
     paternal_reference: str
@@ -35,12 +37,44 @@ class CNV_Evaluator:
         """
         return f"CNV Location: {self.location}, Type: {self.cnv_type}, Genotype: {self.genotype}"
 
-    def evaluate_deletion(self, cnv_interval: str, gain_or_loss: str, called_reference: str, eval_assembly) -> list:
+    def evaluate_region(self, interval: str, cnv_type: str, genotype: str) -> cnv_evaluation.CNVEvaluation:
         """
-        Method to evaluate if the CNV is potentially deleterious.
-        This can be expanded based on specific criteria or external data integration.
+        Evaluates a CNV region.
+
+        Parameters:
+        interval (str): Interval to evaluate.
+        cnv_type (str): Type of the CNV (e.g., "GAIN", "LOSS").
+        genotype (str): Genotype of the CNV.
         """
-        # Placeholder logic; real implementation requires more detailed criteria
-        return self.cnv_type == 'loss'
 
+        raw_sequence = get_sequence_from_interval(self.calling_reference, interval)
+        left_flank, right_flank = get_flanking_regions(self.calling_reference, interval, padding=500)
 
+        calling_reference_hits = [_ for _ in self.calling_aligner.map(raw_sequence)]
+        maternal_hits = [_ for _ in self.maternal_aligner.map(raw_sequence)]
+        paternal_hits = [_ for _ in self.paternal_aligner.map(raw_sequence)]
+
+        left_flank_calling_reference_hits = [_ for _ in self.calling_aligner.map(left_flank)]
+        left_flank_maternal_hits = [_ for _ in self.maternal_aligner.map(left_flank)]
+        left_flank_paternal_hits = [_ for _ in self.paternal_aligner.map(left_flank)]
+
+        right_flank_calling_reference_hits = [_ for _ in self.calling_aligner.map(right_flank)]
+        right_flank_maternal_hits = [_ for _ in self.maternal_aligner.map(right_flank)]
+        right_flank_paternal_hits = [_ for _ in self.paternal_aligner.map(right_flank)]
+
+        evaluation = cnv_evaluation.CNVEvaluation(interval,
+                                                  cnv_type,
+                                                  genotype,
+                                                  calling_reference_hits,
+                                                  maternal_hits,
+                                                  paternal_hits,
+                                                  left_flank_calling_reference_hits,
+                                                  left_flank_maternal_hits,
+                                                  left_flank_paternal_hits,
+                                                  right_flank_calling_reference_hits,
+                                                  right_flank_maternal_hits,
+                                                  right_flank_paternal_hits)
+
+        return evaluation
+
+# %%
