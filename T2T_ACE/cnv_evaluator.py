@@ -35,7 +35,9 @@ class CNVEvaluator:
         """
         String representation of the CNVEvaluation.
         """
-        return f"CNV Location: {self.location}, Type: {self.cnv_type}, Genotype: {self.genotype}"
+        return (f"Calling Reference: {self.calling_reference}, "
+                f"Maternal Reference: {self.maternal_reference}, "
+                f"Paternal Reference: {self.paternal_reference}")
 
     def align_cnv_for_evaluation(self, interval: str, cnv_type: str, genotype: str) -> cnv_alignments.CNVAlignments:
         """
