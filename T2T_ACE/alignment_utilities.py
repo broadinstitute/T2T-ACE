@@ -147,4 +147,9 @@ def sum_cigar_events(cigar_str: str) -> str:
 
     return aggregated_cigar_str
 
+
+def extract_interval_from_hit(hit: mp.Alignment):
+    return hit.ctg + ":" + str(hit.r_st) + "-" + str(hit.r_en)
+
+
 # %%

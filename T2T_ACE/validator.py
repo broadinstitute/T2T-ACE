@@ -128,10 +128,6 @@ def check_interval(interval: str, calling_reference_fasta: str,
         return "Duplication Copy number: " + str(result[1] / result[0]), result, alignment_results
 
 
-def extract_interval_from_hit(hit: mappy.Alignment):
-    return hit.ctg + ":" + str(hit.r_st) + "-" + str(hit.r_en)
-
-
 def align_flanking_sequences(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, upper_bound=1000000):
     _, start, stop = parse_interval(interval)
 
@@ -139,10 +135,10 @@ def align_flanking_sequences(interval, calling_reference_fasta: str, called_ref_
         raise ValueError("Interval too large")
 
     left_flank, right_flank = get_flanking_regions(calling_reference_fasta, interval, padding=500)
-    left_flank_hg38_hits = [extract_interval_from_hit(_) for _ in called_ref_aligner.map(left_flank)]
-    left_flank_hg002t2t_hits = [extract_interval_from_hit(_) for _ in truth_ref_aligner.map(left_flank)]
-    right_flank_hg38_hits = [extract_interval_from_hit(_) for _ in called_ref_aligner.map(right_flank)]
-    right_flank_hg002t2t_hits = [extract_interval_from_hit(_) for _ in truth_ref_aligner.map(right_flank)]
+    left_flank_hg38_hits = [au.extract_interval_from_hit(_) for _ in called_ref_aligner.map(left_flank)]
+    left_flank_hg002t2t_hits = [au.extract_interval_from_hit(_) for _ in truth_ref_aligner.map(left_flank)]
+    right_flank_hg38_hits = [au.extract_interval_from_hit(_) for _ in called_ref_aligner.map(right_flank)]
+    right_flank_hg002t2t_hits = [au.extract_interval_from_hit(_) for _ in truth_ref_aligner.map(right_flank)]
 
     return {"left_ref_flank": left_flank_hg38_hits,
             "left_truth_flank": left_flank_hg002t2t_hits,
