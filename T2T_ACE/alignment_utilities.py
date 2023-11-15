@@ -4,7 +4,7 @@ from collections import Counter
 import re
 
 from typing import List
-from Bio.Align.Applications import MafftCommandline
+# from Bio.Align.Applications import MafftCommandline
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
