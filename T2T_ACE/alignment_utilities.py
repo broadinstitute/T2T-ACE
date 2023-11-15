@@ -4,6 +4,7 @@ from collections import Counter
 import re
 
 from typing import List
+from Bio.Align.Applications import MafftCommandline
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -147,4 +148,8 @@ def sum_cigar_events(cigar_str: str) -> str:
 
     return aggregated_cigar_str
 
-# %%
+# def get_multiseq_alignment(seq_list, seq_names):
+#     multiseq_fasta = f"{seq_names[0]}_intervals.fasta"
+
+
+

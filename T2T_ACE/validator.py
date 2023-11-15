@@ -132,16 +132,16 @@ def extract_interval_from_hit(hit: mappy.Alignment):
     return hit.ctg + ":" + str(hit.r_st) + "-" + str(hit.r_en)
 
 
-def align_flanking_sequences(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, upper_bound=1000000):
+def align_flanking_sequences(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, upper_bound=1000000, padding_length=500):
     _, start, stop = parse_interval(interval)
 
     if stop - start > upper_bound:
         raise ValueError("Interval too large")
 
-    left_flank, right_flank = get_flanking_regions(calling_reference_fasta, interval, padding=500)
-    left_flank_hg38_hits = [extract_interval_from_hit(_) for _ in called_ref_aligner.map(left_flank)]
+    left_flank, right_flank = get_flanking_regions(calling_reference_fasta, interval, padding=padding_length)
+    left_flank_hg38_hits = [extract_interval_from_hit(_) for _ in called_ref_aligner.map(left_flank) if 'alt' not in _.ctg]
     left_flank_hg002t2t_hits = [extract_interval_from_hit(_) for _ in truth_ref_aligner.map(left_flank)]
-    right_flank_hg38_hits = [extract_interval_from_hit(_) for _ in called_ref_aligner.map(right_flank)]
+    right_flank_hg38_hits = [extract_interval_from_hit(_) for _ in called_ref_aligner.map(right_flank) if 'alt' not in _.ctg]
     right_flank_hg002t2t_hits = [extract_interval_from_hit(_) for _ in truth_ref_aligner.map(right_flank)]
 
     return {"left_ref_flank": left_flank_hg38_hits,
@@ -150,9 +150,9 @@ def align_flanking_sequences(interval, calling_reference_fasta: str, called_ref_
             "right_truth_flank": right_flank_hg002t2t_hits}
 
 
-def get_flanking_pairs(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner):
+def get_flanking_pairs(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, upper_bound=1000000, padding_length=500):
     flanking_alignments = align_flanking_sequences(interval, calling_reference_fasta,
-                                                   called_ref_aligner, truth_ref_aligner)
+                                                   called_ref_aligner, truth_ref_aligner, upper_bound, padding_length)
 
     stuff = {}
     try:
@@ -178,3 +178,8 @@ def get_flanking_pairs(interval, calling_reference_fasta: str, called_ref_aligne
 
     return stuff
 
+def stuff2list(interval, stuff:dict):
+
+    ref_intervals = [interval, stuff['ref_flank'][0][0], stuff['ref_flank'][0][1]]
+    truth_intervals = [stuff['truth_flank'][0][0], stuff['truth_flank'][0][1], stuff['truth_flank'][1][0], stuff['truth_flank'][1][1]]
+    return ref_intervals, truth_intervals
