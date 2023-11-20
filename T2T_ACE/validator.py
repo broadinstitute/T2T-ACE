@@ -183,3 +183,10 @@ def stuff2list(interval, stuff:dict):
     ref_intervals = [interval, stuff['ref_flank'][0][0], stuff['ref_flank'][0][1]]
     truth_intervals = [stuff['truth_flank'][0][0], stuff['truth_flank'][0][1], stuff['truth_flank'][1][0], stuff['truth_flank'][1][1]]
     return ref_intervals, truth_intervals
+
+def align_interval(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner) -> list:
+    dup_seq = get_sequence_from_interval(calling_reference_fasta, interval)
+    dup_hg2_hits = [extract_interval_from_hit(_) for _ in truth_ref_aligner.map(dup_seq)]
+    dup_hg38_hits = [extract_interval_from_hit(_) for _ in called_ref_aligner.map(dup_seq)]
+    #hits = [dup_hg38_hits, dup_hg2_hits]
+    return dup_hg38_hits, dup_hg2_hits
