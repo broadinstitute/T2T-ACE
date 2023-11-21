@@ -160,7 +160,7 @@ class PlotIntervals:
         start, end = map(int, parts[1].split('-'))
         return chromosome, start, end
 
-    def plot_intervals_comparison(self, ratio=6, fig_height=12, flanking=False):
+    def plot_intervals_comparison(self, ratio=6, fig_height=12, flanking=False, save=False):
         hg002_mat_interval_list = [i for i in self.hg002_interval_list if 'MATERNAL' in i]
         hg002_pat_interval_list = [i for i in self.hg002_interval_list if 'PATERNAL' in i]
 
@@ -193,15 +193,15 @@ class PlotIntervals:
         # Plot Each Interval
         for i, interval_str in enumerate(sorted(self.hg38_interval_list, key=lambda x: self.parse_interval(x)[1])):
             chromosome, start, end = self.parse_interval(interval_str)
-            if i == 1:
+            if flanking and i == 1:
                 # Plot event interval
                 ax1.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color='black')
                 # Offset the annotate text to the left
                 ax1.annotate(f'{event_length}bp', xy=((start+end)/2, 0), xytext=(((start+end)/2)-event_length*0.15, 0.1), fontsize=30, fontweight='bold')
             # Plot Left Flanking Region
-            elif i ==2:
+            elif flanking and i ==2:
                 ax1.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=hg38_colormap(hg38_norm(i-1)))
-            # Plot Right Flanking Region
+            # Plot Right Flanking Region or others
             else:
                 ax1.plot([start, end], [0, 0], linewidth=20, solid_capstyle='butt', label=f'{chromosome}:{format(start, ",")}-{format(end, ",")}', color=hg38_colormap(hg38_norm(i)))
 
@@ -320,9 +320,10 @@ class PlotIntervals:
         plt.tight_layout(rect=[0, 0, 0.85, 1])
 
         plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.9)
-
-        plt.savefig(f"{self.hg38_interval_list[0]}_interval_comparison.png",dpi=600)
-
+        if save:
+            plt.savefig(f"{self.hg38_interval_list[0]}_interval_comparison.png", dpi=600)
+        else:
+            plt.show()
 
 
 def compute_dot_matrix(seq1: str, seq2: str, k: int) -> tuple:

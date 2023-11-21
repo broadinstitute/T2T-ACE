@@ -1,4 +1,6 @@
 import logging
+import os
+
 import mappy as mp
 from collections import Counter
 import re
@@ -70,13 +72,15 @@ def print_hits(name: str, query_length: int, alignment_hits: List[mp.Alignment])
     """
     for hit in alignment_hits:
         if is_good_hit(hit, query_length) and 'alt' not in hit.ctg:
-            print("{}{} {}: {} {}-{}\t({}-{})\t{} {}".format("+", name, query_length, hit.ctg, hit.r_st,
+            print("{}{} {}: {} {}-{}\t({}-{})\t{} {} {}".format("+", name, query_length, hit.ctg, hit.r_st,
                                                              hit.r_en, hit.q_st,
-                                                             hit.q_en, hit.mlen, sum_cigar_events(hit.cigar_str)))
+                                                             hit.q_en, hit.mlen, sum_cigar_events(hit.cigar_str),
+                                                             hit.strand))
         else:
-            print("{} {}: {} {}-{}\t({}-{})\t{} {}".format(name, query_length, hit.ctg, hit.r_st,
+            print("{} {}: {} {}-{}\t({}-{})\t{} {} {}".format(name, query_length, hit.ctg, hit.r_st,
                                                            hit.r_en, hit.q_st,
-                                                           hit.q_en, hit.mlen, sum_cigar_events(hit.cigar_str)))
+                                                           hit.q_en, hit.mlen, sum_cigar_events(hit.cigar_str),
+                                                           hit.strand))
 
 
 def print_hits1(alignment_hits: List[mp.Alignment]) -> None:
@@ -150,12 +154,20 @@ def sum_cigar_events(cigar_str: str) -> str:
 
 def get_multiseq_alignment(seq_list, seq_names):
     multiseq_fasta = f"{seq_names[0]}_intervals.fasta"
+    multiseq_aligned_file = f"{seq_names[0]}_intervals_mafft_aligned.fasta"
+
+    # Remove old files if they exist
+    if os.path.exists(multiseq_fasta):
+        os.remove(multiseq_fasta)
+    elif os.path.exists(multiseq_aligned_file):
+        os.remove(multiseq_aligned_file)
+
+    # Start new aLignment
     # Get the sequences in FASTA format
     for seq, name in zip(seq_list, seq_names):
         with open(multiseq_fasta, "a") as f:
             f.write(f">{name}\n{seq}\n")
     # Perform multiseq alignment using MAFFT
-    multiseq_aligned_file = f"{seq_names[0]}_intervals_mafft_aligned.fasta"
     print(f"Running MAFFT alignment for {multiseq_fasta}")
     mafft_cline = MafftCommandline(input=multiseq_fasta, clustalout="on")
     mafft_cline(stdout=multiseq_aligned_file)

@@ -4,9 +4,12 @@ import mappy
 
 from T2T_ACE.interval_parsing import create_interval
 from T2T_ACE.genomic_queries import get_sequence_from_interval, get_flanking_regions, get_region_around_deletion
-from T2T_ACE.interval_parsing import (parse_interval, find_next_interval,
-                                      distance_between_intervals, interval_between_intervals)
+from T2T_ACE.interval_parsing import (parse_interval, find_next_interval, find_previous_interval,
+                                      distance_between_intervals, interval_between_intervals, interval_within_interval,
+                                      interval_size)
 import T2T_ACE.alignment_utilities as au
+import T2T_ACE.alignment_visualization_utilities as avu
+import sys
 
 
 def log_error(level, msg, *args):
@@ -185,8 +188,96 @@ def stuff2list(interval, stuff:dict):
     return ref_intervals, truth_intervals
 
 def align_interval(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner) -> list:
-    dup_seq = get_sequence_from_interval(calling_reference_fasta, interval)
-    dup_hg2_hits = [extract_interval_from_hit(_) for _ in truth_ref_aligner.map(dup_seq)]
-    dup_hg38_hits = [extract_interval_from_hit(_) for _ in called_ref_aligner.map(dup_seq)]
-    #hits = [dup_hg38_hits, dup_hg2_hits]
-    return dup_hg38_hits, dup_hg2_hits
+    interval_seq = get_sequence_from_interval(calling_reference_fasta, interval)
+    interval_hg2_hits = [[extract_interval_from_hit(_), _.strand] for _ in truth_ref_aligner.map(interval_seq)]
+    # Collect all the hg38 alignments that are not alt contigs
+    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg]
+    return interval_hg38_hits, interval_hg2_hits
+
+def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, plot=False, plot_ratio=70, save_plot=False):
+    # Check if the input DEL interval is within the DUP interval
+    if interval_within_interval(del_interval, dup_interval):
+        # First Align the DUP sequence to HG2 and hg38
+        dup_alignments = align_interval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
+        del_alignments = align_interval(del_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
+
+        # Check the number of alignments for DUP and DEL in HG2 and hg38
+        hg38_dup_count = len(dup_alignments[0])
+        hg2_dup_count = len(dup_alignments[1])
+        hg38_del_count = len(del_alignments[0])
+        hg2_del_count = len(del_alignments[1])
+
+        # Check if the DUP is a DUP (*2 bc HG2 is diploid)
+        if hg2_dup_count > hg38_dup_count*2:
+            print(f"{dup_interval} is a real DUP. It has {hg2_dup_count} copy(ies) in HG2 and {hg38_dup_count} copy(ies) in hg38\n")
+        else:
+            sys.exit(f"{dup_interval} is not a DUP. It has {hg2_dup_count} copy(ies) in HG2 and {hg38_dup_count} copy(ies) in hg38\n")
+
+        # print the alignments
+        print(f"DUP copies in hg38:{hg38_dup_count}")
+        print(f"DUP copies in HG2:{hg2_dup_count}\n")
+        print(f"DEL copies in hg38:{hg38_del_count}")
+        print(f"DEL copies in HG2:{hg2_del_count}\n")
+
+        # If DEL has copies in HG2, check if they occur in the DUP copy intervals in HG2
+        if hg2_del_count != 0:
+            for dup_alignment in dup_alignments:
+                # print(alignment)
+                for dup_aln_interval in dup_alignment:
+                    if '_' in dup_aln_interval[0]:
+                        # HG2-T2T alignments intervals of DUP
+                        DUP_copy = dup_aln_interval[0]
+                        for del_alignment in del_alignments:
+                            for del_aln_interval in del_alignment:
+                                if '_' in del_aln_interval[0]:
+                                    # HG2-T2T alignments intervals of DEL
+                                    DEL_copy = del_aln_interval[0]
+                                    # If they are on the same chromosome, check if the DEL is within the DUP copy
+                                    if DEL_copy.split(':')[0] == DUP_copy.split(':')[0]:
+                                        if interval_within_interval(DEL_copy, DUP_copy):
+                                            print('DEL in DUP copy:', DEL_copy, DUP_copy)
+        # Collect Flanking regions
+        dup_chrom, dup_pos, dup_end = parse_interval(dup_interval)
+        del_chrom, del_pos, del_end = parse_interval(del_interval)
+
+        left_flanking_interval = create_interval(dup_chrom, dup_pos, del_pos - 1)
+        right_flanking_interval = create_interval(dup_chrom, del_end, dup_end)
+
+        # Align the flanking regions to HG2 and hg38
+        left_flanking_hg2_alignments = align_interval(left_flanking_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)[1]
+        right_flanking_hg2_alignments = align_interval(right_flanking_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)[1]
+        # Grab intervals of right flanking region alignments
+        right_intervals = [i[0] for i in right_flanking_hg2_alignments]
+        left_intervals = [i[0] for i in left_flanking_hg2_alignments]
+
+        print(f'\nLeft flanking region: {left_flanking_interval}; HG2 Copies: {len(left_intervals)}')
+        print(f'DEL length: {interval_size(del_interval)} bp')
+        print(f'Right flanking region: {right_flanking_interval}; HG2 Copies: {len(right_intervals)}')
+        print('\n')
+
+        # Check the distance between the flanking regions' alignments
+        # If the distance is less than half of the DEL interval, print the flanking regions' alignments
+        for left_interval, strand in left_flanking_hg2_alignments:
+            # If the alignment is on the same strand as the DUP, check if the next interval of left flanking region's alignment
+            if strand == 1:
+                distance_between_flankings = distance_between_intervals(left_interval, find_next_interval(left_interval, right_intervals))
+                # print('+', left_interval, ip.find_next_interval(left_interval,right_intervals), distance_between_flankings)
+                if distance_between_flankings < int(interval_size(del_interval)) * 0.5:
+                    print('*', left_interval, find_next_interval(left_interval, right_intervals),
+                          distance_between_flankings)
+            # If the alignment is on the opposite strand as the DUP, check if the previous interval of left flanking region's alignment
+            elif strand == -1:
+                distance_between_flankings = distance_between_intervals(left_interval, find_previous_interval(left_interval, right_intervals))
+                # print('-', left_interval, ip.find_previous_interval(left_interval,right_intervals), distance_between_flankings)
+                if distance_between_flankings < int(interval_size(del_interval)) * 0.5:
+                    print('*', left_interval, find_previous_interval(left_interval, right_intervals),
+                          distance_between_flankings)
+
+        # If plot is True, plot the alignments of the flanking regions
+        if plot:
+            hg38_flanking_intervals = [left_flanking_interval, right_flanking_interval]
+            hg2_flanking_alignment_intervals = [i[0] for i in right_flanking_hg2_alignments] + [i[0] for i in left_flanking_hg2_alignments]
+            avu.PlotIntervals(hg38_flanking_intervals, hg2_flanking_alignment_intervals).plot_intervals_comparison(flanking=False, ratio=plot_ratio, save=save_plot)
+    else:
+        sys.exit(f"DEL interval {del_interval} not within DUP interval {dup_interval}")
+

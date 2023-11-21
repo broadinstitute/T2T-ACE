@@ -215,6 +215,37 @@ def find_next_interval(target, intervals):
     next_interval = filtered_intervals[index]
     return f"{next_interval[0]}:{next_interval[1]}-{next_interval[2]}"
 
+def find_previous_interval(target, intervals):
+    """
+    Find the genomic interval immediately to the left of the target interval, if it exists.
+
+    The function first filters intervals based on the chromosome of the target, sorts them,
+    and then finds the interval that is immediately to the left of the target interval.
+
+    Args:
+        target (str): The target genomic interval in the format "chrX:start-end".
+        intervals (list): A list of genomic intervals in string format.
+
+    Returns:
+        str or None: The genomic interval immediately to the left of the target, or None if no such interval exists.
+
+    Example:
+        >>> find_previous_interval("chr1:2342-4332", ["chr1:5000-6000", "chr1:1000-2000", "chr1:7000-8000"])
+        'chr1:1000-2000'
+    """
+    parsed_target = parse_interval(target)
+    target_chrom = parsed_target[0]
+
+    # Filter intervals by chromosome
+    filtered_intervals = [x for x in sort_intervals(intervals) if x[0] == target_chrom]
+
+    index = bisect_right(filtered_intervals, parsed_target)
+
+    if index == 0:
+        return None
+
+    previous_interval = filtered_intervals[index - 1]
+    return f"{previous_interval[0]}:{previous_interval[1]}-{previous_interval[2]}"
 
 def distance_between_intervals(interval1: str, interval2: str) -> int:
     """
@@ -314,3 +345,47 @@ def interval_between_intervals(interval1: str, interval2: str) -> str:
     else:
         raise ValueError("Intervals should not be overlapping")
 
+def get_reversed_sequence(sequence: str) -> str:
+    """
+    Returns the reverse complement of a given DNA sequence.
+
+    Args:
+        sequence (str): The DNA sequence to reverse complement.
+
+    Returns:
+        str: The reverse complement of the given sequence.
+
+    Example:
+        >>> get_reversed_sequence("ATCG")
+        "CGAT"
+    """
+    complement_dict = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
+    return "".join(complement_dict[base] for base in reversed(sequence))
+
+def interval_within_interval(interval1: str, interval2: str) -> bool:
+    """
+    Checks if the first interval is completely within the second interval.
+
+    Args:
+        interval1 (str): The first genomic interval in the format "chrX:start-end".
+        interval2 (str): The second genomic interval in the format "chrX:start-end".
+
+    Returns:
+        bool: True if the first interval is completely within the second interval, False otherwise.
+
+    Raises:
+        ValueError: If the intervals are not on the same chromosome.
+
+    Example:
+        >>> interval_within_interval("chr1:100-200", "chr1:50-300")
+        True
+        >>> interval_within_interval("chr1:100-200", "chr1:150-300")
+        False
+    """
+    chrom1, start1, end1 = parse_interval(interval1)
+    chrom2, start2, end2 = parse_interval(interval2)
+
+    if chrom1 != chrom2:
+        raise ValueError("Intervals must be on the same chromosome")
+
+    return start2 <= start1 and end1 <= end2
