@@ -250,6 +250,9 @@ def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, ca
         right_intervals = [i[0] for i in right_flanking_hg2_alignments]
         left_intervals = [i[0] for i in left_flanking_hg2_alignments]
 
+        # print(right_flanking_hg2_alignments)
+        # print(left_flanking_hg2_alignments)
+
         print(f'\nLeft flanking region: {left_flanking_interval}; HG2 Copies: {len(left_intervals)}')
         print(f'DEL length: {interval_size(del_interval)} bp')
         print(f'Right flanking region: {right_flanking_interval}; HG2 Copies: {len(right_intervals)}')
@@ -265,6 +268,9 @@ def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, ca
                 if distance_between_flankings < int(interval_size(del_interval)) * 0.5:
                     print('*', left_interval, find_next_interval(left_interval, right_intervals),
                           distance_between_flankings)
+                else:
+                    print(left_interval, find_next_interval(left_interval, right_intervals),
+                          distance_between_flankings)
             # If the alignment is on the opposite strand as the DUP, check if the previous interval of left flanking region's alignment
             elif strand == -1:
                 distance_between_flankings = distance_between_intervals(left_interval, find_previous_interval(left_interval, right_intervals))
@@ -272,6 +278,10 @@ def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, ca
                 if distance_between_flankings < int(interval_size(del_interval)) * 0.5:
                     print('*', left_interval, find_previous_interval(left_interval, right_intervals),
                           distance_between_flankings)
+                else:
+                    print(left_interval, find_previous_interval(left_interval, right_intervals),
+                          distance_between_flankings)
+        # TODO: Check the distance interval. If that interval contains the DEL sequence.
 
         # If plot is True, plot the alignments of the flanking regions
         if plot:

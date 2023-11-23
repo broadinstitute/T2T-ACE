@@ -388,4 +388,7 @@ def interval_within_interval(interval1: str, interval2: str) -> bool:
     if chrom1 != chrom2:
         raise ValueError("Intervals must be on the same chromosome")
 
-    return start2 <= start1 and end1 <= end2
+    elif start1 == start2 or end1 == end2:
+        return ValueError("Intervals should not be touching")
+
+    return start2 < start1 and end1 < end2
