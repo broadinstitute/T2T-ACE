@@ -281,7 +281,7 @@ def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, ca
                 else:
                     print(left_interval, find_previous_interval(left_interval, right_intervals),
                           distance_between_flankings)
-        # TODO: Check the distance interval. If that interval contains the DEL sequence.
+        # TODO: Check the distance interval. If that interval contains the DEL sequence. DONE
 
         # If plot is True, plot the alignments of the flanking regions
         if plot:
@@ -290,4 +290,25 @@ def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, ca
             avu.PlotIntervals(hg38_flanking_intervals, hg2_flanking_alignment_intervals).plot_intervals_comparison(flanking=False, ratio=plot_ratio, save=save_plot)
     else:
         sys.exit(f"DEL interval {del_interval} not within DUP interval {dup_interval}")
+
+def eval_dup(dup_interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, plot=False,  plot_ratio=70, save_plot=False):
+    # First Align the DUP sequence to HG2 and hg38
+    dup_alignments = align_interval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
+
+    # Check the number of alignments for DUP and DEL in HG2 and hg38
+    hg38_dup_count = len(dup_alignments[0])
+    hg2_dup_count = len(dup_alignments[1])
+
+    # If plot is True, plot the alignments of the flanking regions
+    if plot:
+        avu.PlotIntervals(dup_alignments[0], dup_alignments[1]).plot_intervals_comparison(flanking=False,
+                                                                                          ratio=plot_ratio,
+                                                                                          save=save_plot)
+
+    # Check if the DUP is a DUP (*2 bc HG2 is diploid)
+    if hg2_dup_count > hg38_dup_count*2:
+        print(f"{dup_interval} is a real DUP. It has {hg2_dup_count} copy(ies) in HG2 and {hg38_dup_count} copy(ies) in hg38\n")
+    else:
+        print(f"{dup_interval} is not a DUP. It has {hg2_dup_count} copy(ies) in HG2 and {hg38_dup_count} copy(ies) in hg38\n")
+    return hg38_dup_count,hg2_dup_count
 
