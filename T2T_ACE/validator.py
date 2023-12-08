@@ -6,10 +6,11 @@ from T2T_ACE.interval_parsing import create_interval
 from T2T_ACE.genomic_queries import get_sequence_from_interval, get_flanking_regions, get_region_around_deletion
 from T2T_ACE.interval_parsing import (parse_interval, find_next_interval, find_previous_interval,
                                       distance_between_intervals, interval_between_intervals, interval_within_interval,
-                                      interval_size)
+                                      interval_size, get_reversed_sequence)
 import T2T_ACE.alignment_utilities as au
 import T2T_ACE.alignment_visualization_utilities as avu
 import sys
+from Bio import pairwise2
 
 
 def log_error(level, msg, *args):
@@ -188,10 +189,12 @@ def stuff2list(interval, stuff:dict):
     return ref_intervals, truth_intervals
 
 def align_interval(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner) -> list:
+    interval_length = interval_size(interval)
     interval_seq = get_sequence_from_interval(calling_reference_fasta, interval)
-    interval_hg2_hits = [[extract_interval_from_hit(_), _.strand] for _ in truth_ref_aligner.map(interval_seq)]
+    # Collect all alignments that are at least 95% of the interval length
+    interval_hg2_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in truth_ref_aligner.map(interval_seq) if (_.q_en - _.q_st + 1) / interval_length > 0.95]
     # Collect all the hg38 alignments that are not alt contigs
-    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg]
+    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg and 'random' not in _.ctg and (_.q_en - _.q_st + 1) / interval_length > 0.95]
     return interval_hg38_hits, interval_hg2_hits
 
 def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, plot=False, plot_ratio=70, save_plot=False):
@@ -311,4 +314,33 @@ def eval_dup(dup_interval, calling_reference_fasta: str, called_ref_aligner, tru
     else:
         print(f"{dup_interval} is not a DUP. It has {hg2_dup_count} copy(ies) in HG2 and {hg38_dup_count} copy(ies) in hg38\n")
     return hg38_dup_count,hg2_dup_count
+
+# Create a function to check pairwise alignment of the minimap2 alignment results
+# This function only works if the DUP sequence only aligns to one location in hg38
+def check_pairwise_alignment(interval, calling_reference_fasta, truth_reference_fasta, called_ref_aligner, truth_ref_aligner):
+    alignments = align_interval(interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
+    hg38_alignment = alignments[0][0][0]
+    hg38_seq = get_sequence_from_interval(calling_reference_fasta, hg38_alignment)
+    hg2_alignments = alignments[1]
+    hg2_alignments_start_dict = {}
+    for hg2_interval, strand in hg2_alignments:
+        hg2_seq = ''
+        if strand == 1:
+            hg2_seq = get_sequence_from_interval(truth_reference_fasta, hg2_interval)
+        elif strand == -1:
+            hg2_seq = get_reversed_sequence(get_sequence_from_interval(truth_reference_fasta,hg2_interval))
+        else:
+            print('Error: strand is not 1 or -1')
+        alignments = pairwise2.align.localms(hg38_seq, hg2_seq, 2, -1, -1, -0.5)
+        best_alignment = alignments[0]
+        # alignment_score = best_alignment.score
+        start, end = best_alignment.start, best_alignment.end
+        # print(f"Alignment Interval: {hg2_interval}, Strand: {strand}")
+        # print(f"Alignment Score: {alignment_score}")
+        # print(f"Alignment Start: {start}, End: {end}")
+        # print('--------------------------------------------')
+        hg2_alignments_start_dict[hg2_interval] = start
+    return hg2_alignments_start_dict
+
+
 
