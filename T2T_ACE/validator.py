@@ -192,9 +192,9 @@ def align_interval(interval, calling_reference_fasta: str, called_ref_aligner, t
     interval_length = interval_size(interval)
     interval_seq = get_sequence_from_interval(calling_reference_fasta, interval)
     # Collect all alignments that are at least 95% of the interval length
-    interval_hg2_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in truth_ref_aligner.map(interval_seq) if (_.q_en - _.q_st + 1) / interval_length > 0.95]
+    interval_hg2_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in truth_ref_aligner.map(interval_seq)]# if (_.q_en - _.q_st + 1) / interval_length > 0.95]
     # Collect all the hg38 alignments that are not alt contigs
-    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg and 'random' not in _.ctg and (_.q_en - _.q_st + 1) / interval_length > 0.95]
+    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg and 'random' not in _.ctg]# and (_.q_en - _.q_st + 1) / interval_length > 0.95]
     return interval_hg38_hits, interval_hg2_hits
 
 def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, plot=False, plot_ratio=70, save_plot=False):
