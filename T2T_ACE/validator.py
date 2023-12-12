@@ -192,10 +192,33 @@ def align_interval(interval, calling_reference_fasta: str, called_ref_aligner, t
     interval_length = interval_size(interval)
     interval_seq = get_sequence_from_interval(calling_reference_fasta, interval)
     # Collect all alignments that are at least 95% of the interval length
-    interval_hg2_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in truth_ref_aligner.map(interval_seq)]# if (_.q_en - _.q_st + 1) / interval_length > 0.95]
+    interval_hg2_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in truth_ref_aligner.map(interval_seq) if (_.q_en - _.q_st + 1) / interval_length > 0.5]
     # Collect all the hg38 alignments that are not alt contigs
-    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg and 'random' not in _.ctg]# and (_.q_en - _.q_st + 1) / interval_length > 0.95]
+    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg and 'random' not in _.ctg and (_.q_en - _.q_st + 1) / interval_length > 0.5]
     return interval_hg38_hits, interval_hg2_hits
+
+# Report the alignment of the DUP interval to the two references (hg38 and HG2)
+def reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner):
+        # First Align the DUP sequence to HG2 and hg38
+        dup_alignments = align_interval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
+
+        # Check the number of alignments for DUP and DEL in HG2 and hg38
+        hg38_dup_count = len(dup_alignments[0])
+        hg2_dup_count = len(dup_alignments[1])
+        hg2_mat_copies = [[interval, strand, q_start, q_end] for interval, strand, q_start, q_end in dup_alignments[1] if 'MAT' in interval]
+        hg2_pat_copies = [[interval, strand, q_start, q_end] for interval, strand, q_start, q_end in dup_alignments[1] if 'PAT' in interval]
+
+        print(f"input dup interval: {dup_interval}")
+        print(f"hg38 dup count: {hg38_dup_count}")
+        for interval, strand, q_start, q_end in dup_alignments[0]:
+            print(f"interval: {interval}\tstrand: {strand}, start: {q_start}, end: {q_end}")
+        print(f"hg2 dup count: {hg2_dup_count}")
+        for interval, strand, q_start, q_end in hg2_mat_copies:
+            print(f"interval: {interval}\tstrand: {strand}, start: {q_start}, end: {q_end}")
+        for interval, strand, q_start, q_end in hg2_pat_copies:
+            print(f"interval: {interval}\tstrand: {strand}, start: {q_start}, end: {q_end}")
+
+        return(hg38_dup_count, len(hg2_mat_copies), len(hg2_pat_copies), hg2_dup_count)
 
 def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, plot=False, plot_ratio=70, save_plot=False):
     # Check if the input DEL interval is within the DUP interval
