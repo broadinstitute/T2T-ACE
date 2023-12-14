@@ -232,11 +232,14 @@ def reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, t
 
 def classifyDupInterval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner):
     hg38_dup_count, hg2_mat_count, hg2_pat_count, hg2_dup_count = reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
-
+    chr,pos,end = parse_interval(dup_interval)
     # Classify the DUP interval
     if hg2_mat_count > hg38_dup_count and hg2_pat_count > hg38_dup_count:
         classification = "Homozygous Duplication"
     elif hg2_mat_count > hg38_dup_count and hg2_pat_count == hg38_dup_count:
+        classification = "Maternal Heterozygous Duplication"
+    # Taking account of Sex chromosomes (This is a temporary fix for HG2/Male sample)
+    elif chr == 'chrX' and hg2_mat_count > hg38_dup_count and hg2_pat_count == 0:
         classification = "Maternal Heterozygous Duplication"
     elif hg2_pat_count > hg38_dup_count and hg2_mat_count == hg38_dup_count:
         classification = "Paternal Heterozygous Duplication"

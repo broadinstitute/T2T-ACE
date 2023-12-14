@@ -8,6 +8,9 @@ from T2T_ACE.interval_parsing import parse_interval, interval_size, create_inter
 def extend_2_right(dup_interval, calling_reference_fasta, called_ref_aligner,
                                  truth_ref_aligner):
     chr, pos, end = parse_interval(dup_interval)
+    if chr == "chrX" or chr == "chrY":
+        print("Basepair correction Method doesn't support DUPs on chrX or chrY")
+        return dup_interval, 0
     original_end = end
     # The window size is 10% of the interval size
     window_size = int(np.round(interval_size(dup_interval) * 0.1, 0))
@@ -79,6 +82,9 @@ def extend_2_right(dup_interval, calling_reference_fasta, called_ref_aligner,
 def extend_2_left(dup_interval, calling_reference_fasta, called_ref_aligner,
                                  truth_ref_aligner):
     chr, pos, end = parse_interval(dup_interval)
+    if chr == "chrX" or chr == "chrY":
+        print("Basepair correction Method doesn't support DUPs on chrX or chrY")
+        return dup_interval, 0
     original_pos = pos
     # The window size is 10% of the interval size
     window_size = int(np.round(interval_size(dup_interval) * 0.1, 0))
