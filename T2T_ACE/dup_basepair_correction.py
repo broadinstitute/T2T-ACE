@@ -118,12 +118,20 @@ def extend_2_left(dup_interval, calling_reference_fasta, called_ref_aligner,
             break
         # If there is only one non-zero(or non-one) start position for all alignments
         # Then this sequence might hit the unresolved region in hg38
-        elif min(q_start_list)>1 and len(q_start_count) == 1:
+        elif min(q_start_list)>1 and len(q_start_count) >= 1:
             print("new interval", new_interval, interval_size(new_interval))
             print(q_start_count)
             print("This sequence might hit the unresolved region in hg38")
-            copies_alignment_start = new_pos + q_start_count[0][0]
+            copies_alignment_start = new_pos + q_start_count[-1][0]
             print(f"extend pos to the left by {original_pos - (new_pos + q_start_count[0][0])}bp")
+            basepair_accuracy = 0
+            break
+        elif len(q_start_count) > 1 and q_start_count[-1][1] ==2 and q_start_count[-1][0] > 3:
+            print("new interval", new_interval, interval_size(new_interval))
+            print(q_start_count)
+            print("The sequence isn't homozygous")
+            copies_alignment_start = new_pos + q_start_count[-1][0]
+            print(f"extend pos to the left by {original_pos - (new_pos + q_start_count[-1][0])}bp")
             basepair_accuracy = 0
             break
         else:
