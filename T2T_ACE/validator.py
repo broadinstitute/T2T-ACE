@@ -253,7 +253,7 @@ def classifyDupInterval(dup_interval, calling_reference_fasta, called_ref_aligne
     # Gather the chromosomes of the DUP copies in HG2
     hg2_mat_interval_chrs = [interval.split(':')[0].split("_")[0] for interval, strand, q_start, q_end in hg2_mat_copies]
     hg2_pat_interval_chrs = [interval.split(':')[0].split("_")[0] for interval, strand, q_start, q_end in
-                             hg2_mat_copies]
+                             hg2_pat_copies]
 
     chr, pos, end = parse_interval(dup_interval)
 
@@ -278,9 +278,6 @@ def classifyDupInterval(dup_interval, calling_reference_fasta, called_ref_aligne
     elif chr == 'chrY' and hg2_pat_count > hg38_dup_count and hg2_mat_count == 0:
         major_classification = "Duplication"
         sub_classification = "Paternal Heterozygous Duplication"
-    elif hg38_dup_count == 1 and hg2_dup_count == 0:
-        major_classification = "Reference Error"
-        sub_classification = "hg38 Reference Error"
     elif hg2_mat_count == hg38_dup_count and hg2_pat_count == hg38_dup_count:
         major_classification = "Copy Neutral"
         sub_classification = "Biallelic Copy Neutral"
@@ -290,6 +287,9 @@ def classifyDupInterval(dup_interval, calling_reference_fasta, called_ref_aligne
     elif hg2_pat_count == hg38_dup_count and hg2_mat_count == 0:
         major_classification = "Copy Neutral"
         sub_classification = "Paternal Copy Neutral"
+    elif hg38_dup_count == 1 and hg2_mat_count == 0 and hg2_pat_count == 0:
+        major_classification = "Reference Error"
+        sub_classification = "hg38 Reference Error"
     else:
         major_classification = "Unknown"
         sub_classification = "Unknown"

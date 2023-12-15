@@ -266,9 +266,14 @@ class eval_dup_interval:
             print("----------------------------------------------------------------")
             print("ANALYZING THE END OF THE DUP INTERVAL")
             print("----------------------------------------------------------------")
-            if min(hg2_alignments_ends)<dup_interval_size:
+            if min(hg2_alignments_ends)<dup_interval_size and hg2_alignments_ends.count(max(hg2_alignments_ends)) <= hg38_dup_count:
                 print(f"The called interval end needs to be moved to the left by {max(hg2_alignments_ends)-min(hg2_alignments_ends)}bp")
                 right_side_correction = pos + min(hg2_alignments_ends)
+                right_basepair_accuracy = 1
+            # If there are enough alignments to support the original interval end, then the end of the interval will not be moved
+            elif min(hg2_alignments_ends)<dup_interval_size and hg2_alignments_ends.count(max(hg2_alignments_ends)) > hg38_dup_count:
+                print(f"No need to move the called interval end to the left. Left movement might cause more alignments than expected")
+                right_side_correction = pos + max(hg2_alignments_ends)
                 right_basepair_accuracy = 1
             elif max(hg2_alignments_ends)>=dup_interval_size:
                 print("The called interval end needs to be checked by extend_2_right")

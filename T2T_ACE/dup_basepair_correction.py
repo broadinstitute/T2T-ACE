@@ -19,6 +19,7 @@ def extend_2_right(dup_interval, calling_reference_fasta, called_ref_aligner,
     q_end_list = [q_en for interval, strand, q_st, q_en in
                   align_interval(dup_interval, calling_reference_fasta, called_ref_aligner,
                                  truth_ref_aligner)[1]]
+    original_end_count = len(q_end_list)
     new_interval = dup_interval
     copies_alignment_end = ""
     basepair_accuracy = 0
@@ -64,6 +65,14 @@ def extend_2_right(dup_interval, calling_reference_fasta, called_ref_aligner,
             copies_alignment_end = pos + q_end_count[0][0]
             basepair_accuracy = 0
             break
+        elif len(q_end_list) > original_end_count:
+            print("new interval", new_interval, interval_size(new_interval))
+            print(q_end_count)
+            print("The sequence has extended to copies that doesn't exist in the original interval alignment")
+            print(f"Keep the last iteration pos which means extend end to the right {end - original_end}bp")
+            copies_alignment_end = end
+            basepair_accuracy = 0
+            break
         else:
             print("new interval", new_interval, interval_size(new_interval))
             print(q_end_count)
@@ -93,6 +102,7 @@ def extend_2_left(dup_interval, calling_reference_fasta, called_ref_aligner,
     q_start_list = [q_st for interval, strand, q_st, q_en in
                     align_interval(dup_interval, calling_reference_fasta, called_ref_aligner,
                                    truth_ref_aligner)[1]]
+    original_q_start_count = len(q_start_list)
     new_interval = dup_interval
     copies_alignment_start = ""
     basepair_accuracy = 0
@@ -138,6 +148,14 @@ def extend_2_left(dup_interval, calling_reference_fasta, called_ref_aligner,
             print("The sequence isn't homozygous")
             copies_alignment_start = new_pos + q_start_count[-1][0]
             print(f"extend pos to the left by {original_pos - (new_pos + q_start_count[-1][0])}bp")
+            basepair_accuracy = 0
+            break
+        elif len(q_start_list) > original_q_start_count:
+            print("new interval", new_interval, interval_size(new_interval))
+            print(q_start_count)
+            print("The sequence has extended to copies that doesn't exist in the original interval alignment")
+            copies_alignment_start = pos
+            print(f"Keep the last iteration pos which means extend pos to the left {original_pos - pos}bp")
             basepair_accuracy = 0
             break
         else:
