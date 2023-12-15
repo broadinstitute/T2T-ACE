@@ -1,10 +1,27 @@
 import numpy as np
-from T2T_ACE.validator import align_interval, reportAlignment, classifyDupInterval
+import pandas as pd
+from T2T_ACE.validator import align_interval, align_interval_no_restriction, reportAlignment, classifyDupInterval
 from T2T_ACE.interval_parsing import parse_interval, interval_size, create_interval
 import T2T_ACE.alignment_visualization_utilities as avu
 from T2T_ACE.dup_basepair_correction import extend_2_left, extend_2_right
 import matplotlib.pyplot as plt
 
+# Load unresolved intervals within hg38
+gap_df = pd.read_csv("../resources/ucsc_hg38_gap_region.txt", sep="\t", index_col=[0],header=None)
+# Gather gap intervals from gap_df
+gap_intervals = [f"{row[1]}:{row[2]}-{row[3]}" for index,row in gap_df.iterrows()]
+
+def gap_percentage(dup_interval):
+    chr, pos, end = parse_interval(dup_interval)
+    dup_interval_size = interval_size(dup_interval)
+    gap_overlap_percentage = 0
+    for gap_interval in gap_intervals:
+        gap_chr, gap_pos, gap_end = parse_interval(gap_interval)
+        gap_interval_size = interval_size(gap_interval)
+        if chr == gap_chr and pos <= gap_pos and end >= gap_end:
+            gap_overlap_percentage = np.round((gap_interval_size / dup_interval_size) * 100, 2)
+    return gap_overlap_percentage
+# This class is to evaluate the DUP intervals
 class eval_dup_interval:
     def __init__(self, dup_interval, calling_reference_fasta, truth_ref_fasta, called_ref_aligner, truth_ref_aligner):
         self.dup_interval = dup_interval
@@ -152,18 +169,49 @@ class eval_dup_interval:
             plt.savefig(f'{self.dup_interval}.png', dpi=300)
 
     def analyzeDuplicationIntervals(self):
-        chr, pos, end = parse_interval(self.dup_interval)
-        dup_interval_size = interval_size(self.dup_interval)
         dup_summary_dict = {}
         print("----------------------------------------------------------------")
         print("Alignment Report of Original Interval")
         print("----------------------------------------------------------------")
-        hg38_dup_count, hg2_mat_count, hg2_pat_count, hg2_dup_count = reportAlignment(self.dup_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner, print_alignments=True)
 
-        # Analyze the duplication interval and check its relationship with the real event
-        hg38_alignments, hg2_alignments = align_interval(self.dup_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
-        # Classify the DUP interval
-        dup_interval_classification = classifyDupInterval(self.dup_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
+        chr, pos, end = parse_interval(self.dup_interval)
+        dup_interval_size = interval_size(self.dup_interval)
+        # Check if the DUP interval contains more than 10% unresolved region in hg38
+        big_gap_dup = False
+        # If the overlap is more than 10%, then the DUP interval will be aligned without any restriction
+        # If the overlap is less than 10%, then the DUP interval will be aligned with the alignment length restriction
+        if gap_percentage(self.dup_interval) >= 10:
+            big_gap_dup = True
+            print(f"The DUP interval {self.dup_interval} contains {gap_percentage(self.dup_interval)}% unresolved region in hg38")
+            hg38_dup_count, hg2_mat_count, hg2_pat_count, hg2_dup_count = reportAlignment(self.dup_interval,
+                                                                                          self.calling_reference_fasta,
+                                                                                          self.called_ref_aligner,
+                                                                                          self.truth_ref_aligner,
+                                                                                          print_alignments=True,
+                                                                                          alignment_filter=False)
+            # Get alignment output of the gap contained interval (without alignment length restriction)
+            hg38_alignments, hg2_alignments = align_interval_no_restriction(self.dup_interval, self.calling_reference_fasta,
+                                                             self.called_ref_aligner, self.truth_ref_aligner)
+            # Classify the DUP interval
+            dup_interval_classification = classifyDupInterval(self.dup_interval, self.calling_reference_fasta,
+                                                                  self.called_ref_aligner, self.truth_ref_aligner,
+                                                                  alignment_filter=False)
+            major_classification = dup_interval_classification[0]
+            sub_classification = dup_interval_classification[1]
+        else:
+            hg38_dup_count, hg2_mat_count, hg2_pat_count, hg2_dup_count = reportAlignment(self.dup_interval,
+                                                                                          self.calling_reference_fasta,
+                                                                                          self.called_ref_aligner,
+                                                                                          self.truth_ref_aligner,
+                                                                                          print_alignments=True,
+                                                                                          alignment_filter=True)
+            # Get alignment output of the original interval (with alignment length restriction)
+            hg38_alignments, hg2_alignments = align_interval(self.dup_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
+            # Classify the DUP interval (with alignment length restriction)
+            dup_interval_classification = classifyDupInterval(self.dup_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner, alignment_filter=True)
+            major_classification = dup_interval_classification[0]
+            sub_classification = dup_interval_classification[1]
+
         # Save the alignment report of the original interval to the summary dictionary
         dup_summary_dict['dup_interval'] = self.dup_interval
         dup_summary_dict['dup_interval_size'] = dup_interval_size
@@ -171,10 +219,11 @@ class eval_dup_interval:
         dup_summary_dict['original_hg2_hit_count'] = hg2_dup_count
         dup_summary_dict['original_hg2_mat_hit_count'] = hg2_mat_count
         dup_summary_dict['original_hg2_pat_hit_count'] = hg2_pat_count
-        dup_summary_dict['original_dup_interval_classification'] = dup_interval_classification
-        # if len(hg38_alignments) > 1:
-        #     print(f"WARNING: the DUP interval {self.dup_interval} has more than one alignment in hg38")
-        if dup_interval_classification == "False Duplication":
+        dup_summary_dict['original_dup_interval_major_classification'] = major_classification
+        dup_summary_dict['original_dup_interval_sub_classification'] = sub_classification
+        dup_summary_dict['original_dup_interval_contain_big_gap'] = big_gap_dup
+
+        if dup_interval_classification == "False Duplication" or big_gap_dup == True:
             print('The DUP interval is a False duplication')
             # Assign the attributes associated with corrected interval to NA
             dup_summary_dict['corrected_interval'] = np.nan
@@ -184,7 +233,8 @@ class eval_dup_interval:
             dup_summary_dict['corrected_hg2_hit_count'] = np.nan
             dup_summary_dict['corrected_hg2_mat_hit_count'] = np.nan
             dup_summary_dict['corrected_hg2_pat_hit_count'] = np.nan
-            dup_summary_dict['corrected_dup_interval_classification'] = np.nan
+            dup_summary_dict['corrected_dup_interval_major_classification'] = np.nan
+            dup_summary_dict['corrected_dup_interval_sub_classification'] = np.nan
             dup_summary_dict['corrected_pos_accuracy'] = np.nan
             dup_summary_dict['corrected_end_accuracy'] = np.nan
         # If the DUP interval is not a false duplication, then it might need to be corrected
@@ -247,87 +297,20 @@ class eval_dup_interval:
             dup_summary_dict['expanded_length'] = extended_length
             refined_hg38_alignments, refined_hg2_alignments = align_interval(corrected_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
             corrected_dup_interval_classification = classifyDupInterval(corrected_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
+            corrected_interval_major_classification = corrected_dup_interval_classification[0]
+            corrected_interval_sub_classification = corrected_dup_interval_classification[1]
             dup_summary_dict['corrected_hg38_hit_count'] = corrected_hg38_dup_count
             dup_summary_dict['corrected_hg2_hit_count'] = corrected_hg2_dup_count
             dup_summary_dict['corrected_hg2_mat_hit_count'] = corrected_hg2_mat_count
             dup_summary_dict['corrected_hg2_pat_hit_count'] = corrected_hg2_pat_count
-            dup_summary_dict['corrected_dup_interval_classification'] = corrected_dup_interval_classification
+            dup_summary_dict['corrected_dup_interval_major_classification'] = corrected_interval_major_classification
+            dup_summary_dict['corrected_dup_interval_sub_classification'] = corrected_interval_sub_classification
             dup_summary_dict['corrected_pos_accuracy'] = left_basepair_accuracy
             dup_summary_dict['corrected_end_accuracy'] = right_basepair_accuracy
         print("----------------------------------------------------------------")
         print(f"End of Analysis of DUP interval {self.dup_interval}({dup_interval_size}bp)")
         print("----------------------------------------------------------------")
         return dup_summary_dict
-
-    # This function will determine if the DUP interval needs further extension to match with reality
-    # def extend_interval(self, extension_alignment=False):
-    #     window_size, sliding_window_interval_list, sliding_window_hg38_hit_list, sliding_window_hg2_mat_hit_list, sliding_window_hg2_pat_hit_list, sliding_window_hg2_hit_list = self.bin_alignment()
-    #     # Check the duplication status of the leftest window
-    #     if sliding_window_hg38_hit_list[0]*2 >= sliding_window_hg2_hit_list[0]:
-    #         print(f"The leftest window {sliding_window_interval_list[0]} is a false duplication, no need to extend the interval")
-    #     elif sliding_window_hg38_hit_list[0]*2 < sliding_window_hg2_hit_list[0]:
-    #         print(f"The leftest window {sliding_window_interval_list[0]} is a real duplication, extend the interval to the left one window at a time")
-    #         # Extend the interval to the left by one window
-    #         leftest_interval = sliding_window_interval_list[0]
-    #         leftest_chr, leftest_pos, leftest_end = parse_interval(leftest_interval)
-    #         leftest_interval_hg38_copies = align_interval(leftest_interval, self.calling_reference_fasta, self.called_ref_aligner,
-    #                        self.truth_ref_aligner)[0]
-    #         leftest_interval_hg38_hits = len(leftest_interval_hg38_copies)
-    #         leftest_interval_hg2_copies = align_interval(leftest_interval, self.calling_reference_fasta, self.called_ref_aligner,
-    #                        self.truth_ref_aligner)[1]
-    #         leftest_interval_hg2_hits = len(leftest_interval_hg2_copies)
-    #         print(f"leftest interval: {leftest_interval},{leftest_interval_hg38_hits}, {leftest_interval_hg2_hits}")
-    #         if extension_alignment:
-    #             print(f"{leftest_interval_hg38_copies}, {leftest_interval_hg2_copies}")
-    #         extended_leftest_intervals = []
-    #         while leftest_interval_hg38_hits*2 < leftest_interval_hg2_hits:
-    #             leftest_pos = leftest_pos - window_size
-    #             leftest_end = leftest_end - window_size
-    #             new_leftest_interval = create_interval(leftest_chr, leftest_pos, leftest_end)
-    #             leftest_interval_hg38_copies = align_interval(new_leftest_interval, self.calling_reference_fasta, self.called_ref_aligner,
-    #                                self.truth_ref_aligner)[0]
-    #             leftest_interval_hg38_hits = len(leftest_interval_hg38_copies)
-    #             leftest_interval_hg2_copies = align_interval(new_leftest_interval, self.calling_reference_fasta, self.called_ref_aligner,
-    #                                self.truth_ref_aligner)[1]
-    #             leftest_interval_hg2_hits = len(leftest_interval_hg2_copies)
-    #             print(f"new leftest interval: {new_leftest_interval}, {leftest_interval_hg38_hits}, {leftest_interval_hg2_hits}")
-    #             if extension_alignment:
-    #                 print(f"{leftest_interval_hg38_copies}, {leftest_interval_hg2_copies}")
-    #             extended_leftest_intervals.append(new_leftest_interval)
-    #         # Check the duplication status of the rightest window
-    #         if sliding_window_hg38_hit_list[-1] * 2 >= sliding_window_hg2_hit_list[-1]:
-    #             print(f"The rightest window {sliding_window_interval_list[-1]} is a false duplication, no need to extend the interval")
-    #         elif sliding_window_hg38_hit_list[-1] * 2 < sliding_window_hg2_hit_list[-1]:
-    #             print(f"The rightest window {sliding_window_interval_list[-1]} is a real duplication, extend the interval to the right one window at a time")
-    #             # Extend the interval to the left by one window
-    #             rightest_interval = sliding_window_interval_list[-1]
-    #             rightest_chr, rightest_pos, rightest_end = parse_interval(rightest_interval)
-    #             rightest_interval_hg38_copies = align_interval(rightest_interval, self.calling_reference_fasta, self.called_ref_aligner,
-    #                            self.truth_ref_aligner)[0]
-    #             rightest_interval_hg38_hits = len(rightest_interval_hg38_copies)
-    #             rightest_interval_hg2_copies = align_interval(rightest_interval, self.calling_reference_fasta, self.called_ref_aligner,
-    #                            self.truth_ref_aligner)[1]
-    #             rightest_interval_hg2_hits = len(rightest_interval_hg2_copies)
-    #             print(
-    #                 f"rightest interval: {rightest_interval},{rightest_interval_hg38_hits}, {rightest_interval_hg2_hits}")
-    #             if extension_alignment:
-    #                 print(f"{rightest_interval_hg38_copies}, {rightest_interval_hg2_copies}")
-    #             extended_rightest_intervals = []
-    #             while rightest_interval_hg38_hits * 2 < rightest_interval_hg2_hits:
-    #                 rightest_pos = rightest_pos + window_size
-    #                 rightest_end = rightest_end + window_size
-    #                 new_rightest_interval = create_interval(rightest_chr, rightest_pos, rightest_end)
-    #                 rightest_interval_hg38_copies = align_interval(new_rightest_interval, self.calling_reference_fasta, self.called_ref_aligner,
-    #                                self.truth_ref_aligner)[0]
-    #                 rightest_interval_hg38_hits = len(rightest_interval_hg38_copies)
-    #                 rightest_interval_hg2_copies = align_interval(new_rightest_interval, self.calling_reference_fasta, self.called_ref_aligner,
-    #                                self.truth_ref_aligner)[1]
-    #                 rightest_interval_hg2_hits = len(rightest_interval_hg2_copies)
-    #                 print(
-    #                     f"new rightest interval: {new_rightest_interval}, {rightest_interval_hg38_hits}, {rightest_interval_hg2_hits}")
-    #                 if extension_alignment:
-    #                     print(f"{rightest_interval_hg38_copies}, {rightest_interval_hg2_copies}")
-    #                 extended_rightest_intervals.append(new_rightest_interval)
 
 
 

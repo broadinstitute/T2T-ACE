@@ -207,9 +207,12 @@ def align_interval_no_restriction(interval, calling_reference_fasta: str, called
     return interval_hg38_hits, interval_hg2_hits
 
 # Report the alignment of the DUP interval to the two references (hg38 and HG2)
-def reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner, print_alignments=False):
+def reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner, print_alignments=False, alignment_filter=True):
         # First Align the DUP sequence to HG2 and hg38
-        dup_alignments = align_interval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
+        if alignment_filter:
+            dup_alignments = align_interval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
+        else:
+            dup_alignments = align_interval_no_restriction(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
 
         # Check the number of alignments for DUP and DEL in HG2 and hg38
         hg38_dup_count = len(dup_alignments[0])
@@ -230,22 +233,42 @@ def reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, t
 
         return(hg38_dup_count, len(hg2_mat_copies), len(hg2_pat_copies), hg2_dup_count)
 
-def classifyDupInterval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner):
-    hg38_dup_count, hg2_mat_count, hg2_pat_count, hg2_dup_count = reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
-    chr,pos,end = parse_interval(dup_interval)
+def classifyDupInterval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner, alignment_filter=True):
+    hg38_dup_count, hg2_mat_count, hg2_pat_count, hg2_dup_count = reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner, alignment_filter=alignment_filter)
+    chr, pos, end = parse_interval(dup_interval)
     # Classify the DUP interval
     if hg2_mat_count > hg38_dup_count and hg2_pat_count > hg38_dup_count:
-        classification = "Homozygous Duplication"
+        major_classification = "Duplication"
+        sub_classification = "Homozygous Duplication"
     elif hg2_mat_count > hg38_dup_count and hg2_pat_count == hg38_dup_count:
-        classification = "Maternal Heterozygous Duplication"
+        major_classification = "Duplication"
+        sub_classification = "Maternal Heterozygous Duplication"
     # Taking account of Sex chromosomes (This is a temporary fix for HG2/Male sample)
     elif chr == 'chrX' and hg2_mat_count > hg38_dup_count and hg2_pat_count == 0:
-        classification = "Maternal Heterozygous Duplication"
+        major_classification = "Duplication"
+        sub_classification = "Maternal Heterozygous Duplication"
     elif hg2_pat_count > hg38_dup_count and hg2_mat_count == hg38_dup_count:
-        classification = "Paternal Heterozygous Duplication"
+        major_classification = "Duplication"
+        sub_classification = "Paternal Heterozygous Duplication"
+    elif chr == 'chrY' and hg2_pat_count > hg38_dup_count and hg2_mat_count == 0:
+        major_classification = "Duplication"
+        sub_classification = "Paternal Heterozygous Duplication"
+    elif hg38_dup_count == 1 and hg2_dup_count == 0:
+        major_classification = "Reference Error"
+        sub_classification = "hg38 Reference Error"
+    elif hg2_mat_count == hg38_dup_count and hg2_pat_count == hg38_dup_count:
+        major_classification = "Copy Neutral"
+        sub_classification = "Biallelic Copy Neutral"
+    elif hg2_mat_count == hg38_dup_count and hg2_pat_count ==0:
+        major_classification = "Copy Neutral"
+        sub_classification = "Maternal Copy Neutral"
+    elif hg2_pat_count == hg38_dup_count and hg2_mat_count == 0:
+        major_classification = "Copy Neutral"
+        sub_classification = "Paternal Copy Neutral"
     else:
-        classification = "False Duplication"
-    return classification
+        major_classification = "Unknown"
+        sub_classification = "Unknown"
+    return major_classification, sub_classification
 
 def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, plot=False, plot_ratio=70, save_plot=False):
     # Check if the input DEL interval is within the DUP interval
