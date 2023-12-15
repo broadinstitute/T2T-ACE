@@ -234,10 +234,35 @@ def reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, t
         return(hg38_dup_count, len(hg2_mat_copies), len(hg2_pat_copies), hg2_dup_count)
 
 def classifyDupInterval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner, alignment_filter=True):
-    hg38_dup_count, hg2_mat_count, hg2_pat_count, hg2_dup_count = reportAlignment(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner, alignment_filter=alignment_filter)
+    if alignment_filter:
+        dup_alignments = align_interval(dup_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
+    else:
+        dup_alignments = align_interval_no_restriction(dup_interval, calling_reference_fasta, called_ref_aligner,
+                                                       truth_ref_aligner)
+
+    # Check the number of alignments for DUP and DEL in HG2 and hg38
+    hg38_dup_count = len(dup_alignments[0])
+    hg2_dup_count = len(dup_alignments[1])
+    hg2_mat_copies = [[interval, strand, q_start, q_end] for interval, strand, q_start, q_end in dup_alignments[1] if
+                      'MAT' in interval]
+    hg2_pat_copies = [[interval, strand, q_start, q_end] for interval, strand, q_start, q_end in dup_alignments[1] if
+                      'PAT' in interval]
+
+    hg2_pat_count = len(hg2_pat_copies)
+    hg2_mat_count = len(hg2_mat_copies)
+    # Gather the chromosomes of the DUP copies in HG2
+    hg2_mat_interval_chrs = [interval.split(':')[0].split("_")[0] for interval, strand, q_start, q_end in hg2_mat_copies]
+    hg2_pat_interval_chrs = [interval.split(':')[0].split("_")[0] for interval, strand, q_start, q_end in
+                             hg2_mat_copies]
+
     chr, pos, end = parse_interval(dup_interval)
+
     # Classify the DUP interval
-    if hg2_mat_count > hg38_dup_count and hg2_pat_count > hg38_dup_count:
+    # HG2 doesn't have the copy of the DUP interval in the chromosome that was called in hg38
+    if chr not in hg2_mat_interval_chrs and chr not in hg2_pat_interval_chrs:
+        major_classification = "Reference Error"
+        sub_classification = "hg38 Reference Error"
+    elif hg2_mat_count > hg38_dup_count and hg2_pat_count > hg38_dup_count:
         major_classification = "Duplication"
         sub_classification = "Homozygous Duplication"
     elif hg2_mat_count > hg38_dup_count and hg2_pat_count == hg38_dup_count:
