@@ -223,8 +223,8 @@ class eval_dup_interval:
         dup_summary_dict['original_dup_interval_sub_classification'] = sub_classification
         dup_summary_dict['original_dup_interval_contain_big_gap'] = big_gap_dup
 
-        if dup_interval_classification == "False Duplication" or big_gap_dup == True:
-            print('The DUP interval is a False duplication')
+        if major_classification == "Copy Neutral" or major_classification == "Unknown" or major_classification == "Reference Error" or big_gap_dup == True:
+            print(f"The DUP interval's classification is {major_classification} and it will not be corrected")
             # Assign the attributes associated with corrected interval to NA
             dup_summary_dict['corrected_interval'] = np.nan
             dup_summary_dict['corrected_interval_size'] = np.nan
