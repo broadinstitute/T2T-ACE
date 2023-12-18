@@ -194,7 +194,7 @@ def align_interval(interval, calling_reference_fasta: str, called_ref_aligner, t
     # Collect all alignments that are at least 95% of the interval length
     interval_hg2_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in truth_ref_aligner.map(interval_seq) if (_.q_en - _.q_st + 1) / interval_length > 0.5]
     # Collect all the hg38 alignments that are not alt contigs
-    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg and 'random' not in _.ctg and (_.q_en - _.q_st + 1) / interval_length > 0.5]
+    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg and 'random' not in _.ctg and 'chrUn' not in _.ctg and (_.q_en - _.q_st + 1) / interval_length > 0.5]
     return interval_hg38_hits, interval_hg2_hits
 
 def align_interval_no_restriction(interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner) -> list:
@@ -203,7 +203,7 @@ def align_interval_no_restriction(interval, calling_reference_fasta: str, called
     # Collect all alignments that are at least 95% of the interval length
     interval_hg2_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in truth_ref_aligner.map(interval_seq)]
     # Collect all the hg38 alignments that are not alt contigs
-    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg and 'random' not in _.ctg]
+    interval_hg38_hits = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en] for _ in called_ref_aligner.map(interval_seq) if 'alt' not in _.ctg and 'random' not in _.ctg and 'chrUn' not in _.ctg]
     return interval_hg38_hits, interval_hg2_hits
 
 # Report the alignment of the DUP interval to the two references (hg38 and HG2)
@@ -260,19 +260,22 @@ def classifyDupInterval(dup_interval, calling_reference_fasta, called_ref_aligne
     # Classify the DUP interval
     # HG2 doesn't have the copy of the DUP interval in the chromosome that was called in hg38
     if chr not in hg2_mat_interval_chrs and chr not in hg2_pat_interval_chrs:
-        major_classification = "Reference Error"
+        major_classification = "Reference Error" # Might update this name to "Translocation"
         sub_classification = "hg38 Reference Error"
+    elif hg38_dup_count == 0:
+        major_classification = "Minimap2 Error"
+        sub_classification = "Minimap2 Error"
     elif hg2_mat_count > hg38_dup_count and hg2_pat_count > hg38_dup_count:
         major_classification = "Duplication"
         sub_classification = "Homozygous Duplication"
-    elif hg2_mat_count > hg38_dup_count and hg2_pat_count == hg38_dup_count:
+    elif hg2_mat_count > hg38_dup_count and hg2_pat_count <= hg38_dup_count:
         major_classification = "Duplication"
         sub_classification = "Maternal Heterozygous Duplication"
     # Taking account of Sex chromosomes (This is a temporary fix for HG2/Male sample)
     elif chr == 'chrX' and hg2_mat_count > hg38_dup_count and hg2_pat_count == 0:
         major_classification = "Duplication"
         sub_classification = "Maternal Heterozygous Duplication"
-    elif hg2_pat_count > hg38_dup_count and hg2_mat_count == hg38_dup_count:
+    elif hg2_pat_count > hg38_dup_count and hg2_mat_count <= hg38_dup_count:
         major_classification = "Duplication"
         sub_classification = "Paternal Heterozygous Duplication"
     elif chr == 'chrY' and hg2_pat_count > hg38_dup_count and hg2_mat_count == 0:
@@ -413,32 +416,7 @@ def eval_dup(dup_interval, calling_reference_fasta: str, called_ref_aligner, tru
         print(f"{dup_interval} is not a DUP. It has {hg2_dup_count} copy(ies) in HG2 and {hg38_dup_count} copy(ies) in hg38\n")
     return hg38_dup_count,hg2_dup_count
 
-# Create a function to check pairwise alignment of the minimap2 alignment results
-# This function only works if the DUP sequence only aligns to one location in hg38
-def check_pairwise_alignment(interval, calling_reference_fasta, truth_reference_fasta, called_ref_aligner, truth_ref_aligner):
-    alignments = align_interval(interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
-    hg38_alignment = alignments[0][0][0]
-    hg38_seq = get_sequence_from_interval(calling_reference_fasta, hg38_alignment)
-    hg2_alignments = alignments[1]
-    hg2_alignments_start_dict = {}
-    for hg2_interval, strand in hg2_alignments:
-        hg2_seq = ''
-        if strand == 1:
-            hg2_seq = get_sequence_from_interval(truth_reference_fasta, hg2_interval)
-        elif strand == -1:
-            hg2_seq = get_reversed_sequence(get_sequence_from_interval(truth_reference_fasta,hg2_interval))
-        else:
-            print('Error: strand is not 1 or -1')
-        alignments = pairwise2.align.localms(hg38_seq, hg2_seq, 2, -1, -1, -0.5)
-        best_alignment = alignments[0]
-        # alignment_score = best_alignment.score
-        start, end = best_alignment.start, best_alignment.end
-        # print(f"Alignment Interval: {hg2_interval}, Strand: {strand}")
-        # print(f"Alignment Score: {alignment_score}")
-        # print(f"Alignment Start: {start}, End: {end}")
-        # print('--------------------------------------------')
-        hg2_alignments_start_dict[hg2_interval] = start
-    return hg2_alignments_start_dict
+
 
 
 

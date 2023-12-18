@@ -3,7 +3,7 @@ from T2T_ACE.validator import align_interval
 from T2T_ACE.interval_parsing import parse_interval, interval_size, create_interval
 
 
-#basepair correction function of T2T-ACE
+# DUP basepair correction function of T2T-ACE
 # It will extend the DUP interval to the right until no more copies are found
 def extend_2_right(dup_interval, calling_reference_fasta, called_ref_aligner,
                                  truth_ref_aligner):

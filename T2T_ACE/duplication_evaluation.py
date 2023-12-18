@@ -14,12 +14,14 @@ gap_intervals = [f"{row[1]}:{row[2]}-{row[3]}" for index,row in gap_df.iterrows(
 def gap_percentage(dup_interval):
     chr, pos, end = parse_interval(dup_interval)
     dup_interval_size = interval_size(dup_interval)
-    gap_overlap_percentage = 0
+    # Collect all the gaps that have overlap with the DUP interval
+    overlap_gap_intervals = []
     for gap_interval in gap_intervals:
         gap_chr, gap_pos, gap_end = parse_interval(gap_interval)
-        gap_interval_size = interval_size(gap_interval)
         if chr == gap_chr and pos <= gap_pos and end >= gap_end:
-            gap_overlap_percentage = np.round((gap_interval_size / dup_interval_size) * 100, 2)
+            overlap_gap_intervals.append(gap_interval)
+    overlap_gap_intervals_size = sum([interval_size(i) for i in overlap_gap_intervals])
+    gap_overlap_percentage = np.round((overlap_gap_intervals_size / dup_interval_size) * 100, 2)
     return gap_overlap_percentage
 # This class is to evaluate the DUP intervals
 class eval_dup_interval:
@@ -38,6 +40,7 @@ class eval_dup_interval:
         avu.PlotIntervals(hg38_alignment_intervals, hg2_alignment_intervals).plot_intervals_comparison(flanking=False, ratio=ratio, save=save)
 
     # This function is to create sliding window alignment for DUPs
+    # I am keeping the binning related alignment functions in this class for now
     def bin_alignment(self, window_size=1000):
         # Use SVLEN to determine the window size
         svlen = interval_size(self.dup_interval)
