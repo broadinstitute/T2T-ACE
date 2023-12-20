@@ -39,7 +39,8 @@ pat_chromosome_order = [f'chr{i}_PATERNAL' for i in range(1, 23)] + ['chrX_MATER
 pat_chr_size_df.sort_values('chr', key=lambda column: column.map(lambda e: pat_chromosome_order.index(e)),
                             inplace=True, ignore_index=True)
 
-
+# Set seaborn style
+sns.set(style='white')
 class PlotIntervals:
     def __init__(self, hg38_interval_list, hg002_interval_list):
         # plot interval class assumes the first hg38 interval is the event interval
@@ -160,7 +161,7 @@ class PlotIntervals:
         start, end = map(int, parts[1].split('-'))
         return chromosome, start, end
 
-    def plot_intervals_comparison(self, ratio=6, fig_height=12, flanking=False, save=False):
+    def plot_intervals_comparison(self, ratio=6, fig_height=12, flanking=False, save=False, savepath=None):
         hg002_mat_interval_list = [i for i in self.hg002_interval_list if 'MATERNAL' in i]
         hg002_pat_interval_list = [i for i in self.hg002_interval_list if 'PATERNAL' in i]
 
@@ -321,7 +322,11 @@ class PlotIntervals:
 
         plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=0.9)
         if save:
-            plt.savefig(f"{self.hg38_interval_list[0]}_interval_comparison.png", dpi=600)
+            if savepath is None:
+                savepath = os.getcwd()
+            else:
+                savepath = savepath
+            plt.savefig(f"{savepath}/{self.hg38_interval_list[0]}_interval_comparison.png", dpi=600)
         else:
             plt.show()
 

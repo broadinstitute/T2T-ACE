@@ -30,6 +30,7 @@ By calculating the distance between the left and right flanking regions are alig
 ![DEL](docs/DEL_eval_logic.png)
 - **Het DEL Example:** ![DEL](docs/Het_DEL_example.png)
 - **Hom DEL Example:** ![DEL](docs/Hom_DEL_example.png)
+- **FP DEL Example:** ![DEL](docs/FP_DEL_example.png)
 
 ### DUP evaluation
 T2T-ACE align the DUP variant called in reference genome (hg38) to the HG002-T2T reference. T2T-ACE aligns the DNA sequence 
