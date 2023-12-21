@@ -385,7 +385,6 @@ def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, ca
                 else:
                     print(left_interval, find_previous_interval(left_interval, right_intervals),
                           distance_between_flankings)
-        # TODO: Check the distance interval. If that interval contains the DEL sequence. DONE
 
         # If plot is True, plot the alignments of the flanking regions
         if plot:
@@ -395,6 +394,158 @@ def eval_del_in_dup(del_interval, dup_interval, calling_reference_fasta: str, ca
     else:
         sys.exit(f"DEL interval {del_interval} not within DUP interval {dup_interval}")
 
+def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, flanking_size=None):
+    del_flankings_sum_dict = {}
+    del_chrom, del_pos, del_end = parse_interval(del_interval)
+    del_interval_size = interval_size(del_interval)
+    """
+    Flanking logic: if DEL is less than 1000 bp, flanking regions are 1000 bp on both sides. If 1000bp is
+    not enough to have alignments in HG2, then increase the flanking region size by 1000 bp until there are
+    alignments in HG2. If DEL is more than 1000 bp, flanking regions are 10% of the DEL interval on both sides.
+    flanking size can also be specified by the user.
+    """
+    if flanking_size:
+        flanking_size = flanking_size
+    else:
+        if del_interval_size < 3000:
+            flanking_size = 1000
+        else:
+            flanking_size = int(del_interval_size * 0.1)
+    # initiate of flanking intervals
+    hg38_left_flanking_interval = None
+    hg38_right_flanking_interval = None
+    left_flanking_hg38_alignment_intervals = []
+    right_flanking_hg38_alignment_intervals = []
+    left_flanking_hg2_alignment_intervals = []
+    right_flanking_hg2_alignment_intervals = []
+    left_flanking_interval_aligned = []
+
+    # Use while loop to increase the flanking size until there are at least two alignments in HG2
+    # Assuming the alignment is one MAT nad one PAT
+    # If one flanking sequence is heterozygous which is unlikely, at least another flanking seq should
+    #  have two alignments in HG2 on one chromosome
+    while len(left_flanking_hg2_alignment_intervals) < 2 or len(right_flanking_hg2_alignment_intervals) < 2:
+        print(f"flanking_size: {flanking_size}")
+        left_flanking_pos = del_pos - flanking_size
+        left_flanking_end = del_pos
+        right_flanking_pos = del_end
+        right_flanking_end = del_end + flanking_size
+        hg38_left_flanking_interval = create_interval(del_chrom, left_flanking_pos, left_flanking_end)
+        hg38_right_flanking_interval = create_interval(del_chrom, right_flanking_pos, right_flanking_end)
+
+        # Align the flanking intervals to the reference genome and HG2
+        left_flanking_interval_aligned = align_interval(hg38_left_flanking_interval, calling_reference_fasta, called_ref_aligner,
+                                                          truth_ref_aligner)
+        right_flanking_interval_aligned = align_interval(hg38_right_flanking_interval, calling_reference_fasta, called_ref_aligner,
+                                                          truth_ref_aligner)
+        # Gather the intervals of flanking region alignments in reference genome (hg38)
+        # The alignments in hg38 and HG2 should be on the same chromosome as the DEL interval
+        # If more than 1, it means this DEL interval might exist in a DUP region
+        left_flanking_hg38_alignment_intervals = [interval for interval, strand, q_start, q_end in
+                                                  left_flanking_interval_aligned[0] if f"{del_chrom}:" in interval]
+        right_flanking_hg38_alignment_intervals = [interval for interval, strand, q_start, q_end in
+                                                   right_flanking_interval_aligned[0] if f"{del_chrom}:" in interval]
+        # Gather the intervals of flanking region alignments in HG2
+        left_flanking_hg2_alignment_intervals = [interval for interval, strand, q_start, q_end in left_flanking_interval_aligned[1] if f"{del_chrom}_" in interval]
+        right_flanking_hg2_alignment_intervals = [interval for interval, strand, q_start, q_end in right_flanking_interval_aligned[1] if f"{del_chrom}_" in interval]
+
+        # Print out the flanking intervals, their sizes, and the number of alignments in HG002
+        print(
+            f"left flanking interval: {hg38_left_flanking_interval}, {interval_size(hg38_left_flanking_interval)}, {len(left_flanking_hg38_alignment_intervals)}, {len(left_flanking_hg2_alignment_intervals)}")
+        print(
+            f"right flanking interval: {hg38_right_flanking_interval}, {interval_size(hg38_right_flanking_interval)}, {len(right_flanking_hg38_alignment_intervals)}, {len(right_flanking_hg2_alignment_intervals)}")
+
+        # Increase the flanking size by 1000bp if there is less than two alignments in HG002
+        # 1000 is arbitrary. But it seems to work well for most of the cases.
+        if len(left_flanking_hg2_alignment_intervals) < 2 or len(right_flanking_hg2_alignment_intervals) < 2:
+            flanking_size = flanking_size + 1000
+
+    # After flanking size is determined, add general information to the dictionary
+    del_flankings_sum_dict['del_interval'] = del_interval
+    del_flankings_sum_dict['del_interval_size'] = del_interval_size
+    del_flankings_sum_dict['flanking_size'] = flanking_size
+    del_flankings_sum_dict['left_flanking_interval'] = hg38_left_flanking_interval
+    del_flankings_sum_dict['right_flanking_interval'] = hg38_right_flanking_interval
+    del_flankings_sum_dict['left_flanking_hg38_hits'] = len(left_flanking_hg38_alignment_intervals)
+    del_flankings_sum_dict['right_flanking_hg38_hits'] = len(right_flanking_hg38_alignment_intervals)
+    del_flankings_sum_dict['left_flanking_hg2_hits'] = len(left_flanking_hg2_alignment_intervals)
+    del_flankings_sum_dict['right_flanking_hg2_hits'] = len(right_flanking_hg2_alignment_intervals)
+
+    # Calculate the distance between the flanking regions' alignments
+    # If the distance is less than half of the DEL interval means this is evidence for DEL event
+    # Otherwise, no evidence for DEL event
+    distance_between_flankings_list = []
+    flanking_connection_strand_list = []
+    for left_flanking_interval, strand, q_start, q_end in left_flanking_interval_aligned[1]:
+        if left_flanking_interval in left_flanking_hg2_alignment_intervals:
+            if strand == 1:
+                if find_next_interval(left_flanking_interval, right_flanking_hg2_alignment_intervals):
+                    matching_right_flanking_interval = find_next_interval(left_flanking_interval,
+                                                                          right_flanking_hg2_alignment_intervals)
+                    distance_between_flankings = distance_between_intervals(left_flanking_interval,
+                                                                              matching_right_flanking_interval)
+                    distance_between_flankings_list.append(distance_between_flankings)
+                    flanking_connection_strand_list.append("POS")
+                    if distance_between_flankings < int(del_interval_size) * 0.5:
+                        print('********** Potential DEL **********')
+                    else:
+                        print("----------- No DEL Evidence -----------")
+                    print(
+                        f"{left_flanking_interval} ({interval_size(left_flanking_interval)}bp), {matching_right_flanking_interval} ({interval_size(matching_right_flanking_interval)}bp), {distance_between_flankings}")
+                elif find_previous_interval(left_flanking_interval, right_flanking_hg2_alignment_intervals):
+                    matching_right_flanking_interval = find_previous_interval(left_flanking_interval,
+                                                                              right_flanking_hg2_alignment_intervals)
+                    distance_between_flankings = distance_between_intervals(left_flanking_interval,
+                                                                              matching_right_flanking_interval)
+                    distance_between_flankings_list.append(distance_between_flankings)
+                    flanking_connection_strand_list.append("NEG")
+                    if distance_between_flankings < int(del_interval_size) * 0.5:
+                        print('********** Potential DEL **********')
+                    else:
+                        print("----------- No DEL Evidence -----------")
+                    print(
+                        f"{left_flanking_interval} ({interval_size(left_flanking_interval)}bp), {matching_right_flanking_interval} ({interval_size(matching_right_flanking_interval)}bp), {distance_between_flankings}")
+
+                else:
+                    distance_between_flankings_list.append(None)
+                    flanking_connection_strand_list.append(None)
+                    print(f"No matching right flanking interval for {left_flanking_interval}")
+            elif strand == -1:
+                if find_previous_interval(left_flanking_interval, right_flanking_hg2_alignment_intervals):
+                    matching_right_flanking_interval = find_previous_interval(left_flanking_interval,
+                                                                                right_flanking_hg2_alignment_intervals)
+                    distance_between_flankings = distance_between_intervals(left_flanking_interval,
+                                                                              matching_right_flanking_interval)
+                    distance_between_flankings_list.append(distance_between_flankings)
+                    flanking_connection_strand_list.append("POS")
+                    if distance_between_flankings < int(del_interval_size) * 0.5:
+                        print('********** Potential DEL**********')
+                    else:
+                        print("----------- No DEL Evidence -----------")
+                    print(
+                        f"{left_flanking_interval} ({interval_size(left_flanking_interval)}bp), {matching_right_flanking_interval} ({interval_size(matching_right_flanking_interval)}bp), {distance_between_flankings}")
+                elif find_next_interval(left_flanking_interval, right_flanking_hg2_alignment_intervals):
+                    matching_right_flanking_interval = find_next_interval(left_flanking_interval,
+                                                                              right_flanking_hg2_alignment_intervals)
+                    distance_between_flankings = distance_between_intervals(left_flanking_interval,
+                                                                              matching_right_flanking_interval)
+                    distance_between_flankings_list.append(distance_between_flankings)
+                    flanking_connection_strand_list.append("NEG")
+                    if distance_between_flankings < int(del_interval_size) * 0.5:
+                        print('********** Potential DEL **********')
+                    else:
+                        print("----------- No DEL Evidence -----------")
+                    print(
+                        f"{left_flanking_interval} ({interval_size(left_flanking_interval)}bp), {matching_right_flanking_interval} ({interval_size(matching_right_flanking_interval)}bp), {distance_between_flankings}")
+                else:
+                    distance_between_flankings_list.append(None)
+                    flanking_connection_strand_list.append(None)
+                    print(f"No matching right flanking interval for {left_flanking_interval}")
+
+    # Add the distance between the flanking regions' alignments and strand to the dictionary
+    del_flankings_sum_dict['distance_between_flankings'] = distance_between_flankings_list
+    del_flankings_sum_dict['flanking_connection_strand'] = flanking_connection_strand_list
+    return del_flankings_sum_dict
 
 
 
