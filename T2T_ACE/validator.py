@@ -1,5 +1,6 @@
 import logging
-
+import numpy as np
+import pandas as pd
 import mappy
 
 from T2T_ACE.interval_parsing import create_interval
@@ -10,8 +11,11 @@ from T2T_ACE.interval_parsing import (parse_interval, find_next_interval, find_p
 import T2T_ACE.alignment_utilities as au
 import T2T_ACE.alignment_visualization_utilities as avu
 import sys
-from Bio import pairwise2
 
+# Load the chromosome sizes
+chrom_size_path = "../resources/hg38_chrom_size.txt"
+chrom_size_df = pd.read_csv(chrom_size_path, sep='\t', header=None, names=['chr', 'size'])
+chrom_size_dict = {row['chr']: row['size'] for index, row in chrom_size_df.iterrows()}
 
 def log_error(level, msg, *args):
     logging.log(level, f"Error: {msg}", *args)
@@ -424,12 +428,23 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
     # Assuming the alignment is one MAT nad one PAT
     # If one flanking sequence is heterozygous which is unlikely, at least another flanking seq should
     #  have two alignments in HG2 on one chromosome
-    while len(left_flanking_hg2_alignment_intervals) < 2 or len(right_flanking_hg2_alignment_intervals) < 2:
-        print(f"flanking_size: {flanking_size}")
+    # Taking account of sex chrom
+    if del_chrom == 'chrX' or del_chrom == 'chrY':
+        copy_threshold = 1
+    else:
+        copy_threshold = 2
+    while len(left_flanking_hg2_alignment_intervals) < copy_threshold or len(right_flanking_hg2_alignment_intervals) < copy_threshold:
+        print(f"flanking_size: {flanking_size}, copy_threshold: {copy_threshold}")
         left_flanking_pos = del_pos - flanking_size
         left_flanking_end = del_pos
         right_flanking_pos = del_end
         right_flanking_end = del_end + flanking_size
+        if right_flanking_end >= chrom_size_dict[del_chrom]:
+            print("Extension exceeds the length of the chromosome")
+            break
+        if left_flanking_pos < 0:
+            print("Extension exceeds the length of the chromosome")
+            break
         hg38_left_flanking_interval = create_interval(del_chrom, left_flanking_pos, left_flanking_end)
         hg38_right_flanking_interval = create_interval(del_chrom, right_flanking_pos, right_flanking_end)
 
@@ -457,8 +472,16 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
 
         # Increase the flanking size by 1000bp if there is less than two alignments in HG002
         # 1000 is arbitrary. But it seems to work well for most of the cases.
-        if len(left_flanking_hg2_alignment_intervals) < 2 or len(right_flanking_hg2_alignment_intervals) < 2:
-            flanking_size = flanking_size + 1000
+        if len(left_flanking_hg2_alignment_intervals) < copy_threshold or len(right_flanking_hg2_alignment_intervals) < copy_threshold:
+            # If the flanking size is larger than the DEL interval, break the loop
+            if flanking_size > del_interval_size and flanking_size > 10000:
+                print(f"Flanking size ({flanking_size}bp) exceeds the size of the DEL interval ({del_interval_size}bp)")
+                break
+            elif del_interval_size > 100000:
+                 flanking_size = flanking_size + int(np.round(0.1 * del_interval_size,0))
+            else:
+                flanking_size = flanking_size + 1000
+
 
     # After flanking size is determined, add general information to the dictionary
     del_flankings_sum_dict['del_interval'] = del_interval
@@ -545,8 +568,50 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
     # Add the distance between the flanking regions' alignments and strand to the dictionary
     del_flankings_sum_dict['distance_between_flankings'] = distance_between_flankings_list
     del_flankings_sum_dict['flanking_connection_strand'] = flanking_connection_strand_list
-    return del_flankings_sum_dict
 
+    # Use the obtained details about the flanking regions to classify the DEL interval
+    if len(left_flanking_hg38_alignment_intervals) > 1 or len(right_flanking_hg38_alignment_intervals) > 1:
+        if distance_between_flankings_list.count(None) != len(distance_between_flankings_list) and min(distance_between_flankings_list) <= del_interval_size * 0.5:
+            major_classification = 'DEL'
+            minor_classification = 'DEL in DUP'
+        else:
+            major_classification = 'False DEL'
+            minor_classification = 'False DEL'
+    elif len(left_flanking_hg38_alignment_intervals) == 1 and len(right_flanking_hg38_alignment_intervals) == 1:
+        if distance_between_flankings_list.count(None) != len(distance_between_flankings_list):
+            if None in distance_between_flankings_list:
+                distance_between_flankings_list.remove(None)
+            del_flanking_dist_list = [distance for distance in distance_between_flankings_list if (distance <= del_interval_size * 0.5)]
+            if len(distance_between_flankings_list) == len(del_flanking_dist_list):
+                if del_chrom != 'chrX' or del_chrom != 'chrY':
+                    if len(del_flanking_dist_list) == 2:
+                        major_classification = 'DEL'
+                        minor_classification = 'Homozygous DEL'
+                    elif len(del_flanking_dist_list) == 1:
+                        major_classification = 'DEL'
+                        minor_classification = 'Heterozygous DEL'
+                    else:
+                        major_classification = 'DEL'
+                        minor_classification = 'Unclassified DEL'
+                else:
+                    major_classification = 'DEL'
+                    minor_classification = 'Heterozygous DEL'
+            elif len(distance_between_flankings_list) > len(del_flanking_dist_list) and len(del_flanking_dist_list) > 0:
+                major_classification = 'DEL'
+                minor_classification = 'Heterozygous DEL'
+            else:
+                major_classification = 'False DEL'
+                minor_classification = 'False DEL'
+        else:
+            major_classification = 'Unknown'
+            minor_classification = 'Unclassified DEL'
+    else:
+        major_classification = 'Unknown'
+        minor_classification = 'Unclassified DEL'
+    # Add the classification to the dictionary
+    del_flankings_sum_dict['classification'] = major_classification
+    del_flankings_sum_dict['minor_classification'] = minor_classification
+    return del_flankings_sum_dict
 
 
 
