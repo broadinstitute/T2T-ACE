@@ -411,10 +411,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
     if flanking_size:
         flanking_size = flanking_size
     else:
-        if del_interval_size < 3000:
-            flanking_size = 1000
+        if del_interval_size < 6500:
+            flanking_size = 2000
         else:
-            flanking_size = int(del_interval_size * 0.1)
+            flanking_size = int(del_interval_size * 0.3)
     # initiate of flanking intervals
     hg38_left_flanking_interval = None
     hg38_right_flanking_interval = None
@@ -570,14 +570,14 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
     del_flankings_sum_dict['flanking_connection_strand'] = flanking_connection_strand_list
 
     # Use the obtained details about the flanking regions to classify the DEL interval
-    if len(left_flanking_hg38_alignment_intervals) > 1 or len(right_flanking_hg38_alignment_intervals) > 1:
+    if len(left_flanking_hg38_alignment_intervals) > 1 and len(right_flanking_hg38_alignment_intervals) > 1 and len(distance_between_flankings_list) > 2:
         if distance_between_flankings_list.count(None) != len(distance_between_flankings_list) and min(distance_between_flankings_list) <= del_interval_size * 0.5:
             major_classification = 'DEL'
             minor_classification = 'DEL in DUP'
         else:
             major_classification = 'False DEL'
             minor_classification = 'False DEL'
-    elif len(left_flanking_hg38_alignment_intervals) == 1 and len(right_flanking_hg38_alignment_intervals) == 1:
+    else:
         if distance_between_flankings_list.count(None) != len(distance_between_flankings_list):
             if None in distance_between_flankings_list:
                 distance_between_flankings_list.remove(None)
@@ -604,10 +604,8 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                 minor_classification = 'False DEL'
         else:
             major_classification = 'Unknown'
-            minor_classification = 'Unclassified DEL'
-    else:
-        major_classification = 'Unknown'
-        minor_classification = 'Unclassified DEL'
+            minor_classification = 'Unknown'
+
     # Add the classification to the dictionary
     del_flankings_sum_dict['classification'] = major_classification
     del_flankings_sum_dict['minor_classification'] = minor_classification
