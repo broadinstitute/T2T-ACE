@@ -4,5 +4,6 @@ __pycache__
 notebooks/*.pdf
 notebooks/*.png
 notebooks/*.fasta
+notebooks/*.csv
 .idea
 resources/centromeres.txt
