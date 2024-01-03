@@ -33,11 +33,11 @@ class eval_dup_interval:
         self.truth_ref_aligner = truth_ref_aligner
 
     # Plot the alignment of the DUP interval to the two references (hg38 and HG2)
-    def plot_alignment(self, ratio=15, save=False):
+    def plot_alignment(self, ratio=15, save=False, save_path=None):
         hg38_alignments, hg2_alignments = align_interval(self.dup_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
         hg38_alignment_intervals = [i[0] for i in hg38_alignments]
         hg2_alignment_intervals = [i[0] for i in hg2_alignments]
-        avu.PlotIntervals(hg38_alignment_intervals, hg2_alignment_intervals).plot_intervals_comparison(flanking=False, ratio=ratio, save=save)
+        avu.PlotIntervals(hg38_alignment_intervals, hg2_alignment_intervals).plot_intervals_comparison(flanking=False, ratio=ratio, save=save, savepath=save_path)
 
     # This function is to create sliding window alignment for DUPs
     # I am keeping the binning related alignment functions in this class for now
@@ -179,6 +179,10 @@ class eval_dup_interval:
 
         chr, pos, end = parse_interval(self.dup_interval)
         dup_interval_size = interval_size(self.dup_interval)
+        if dup_interval_size > 1000000:
+            print("DUP interval is too large")
+            return None
+
         # Check if the DUP interval contains more than 10% unresolved region in hg38
         big_gap_dup = False
         # If the overlap is more than 10%, then the DUP interval will be aligned without any restriction
@@ -226,7 +230,7 @@ class eval_dup_interval:
         dup_summary_dict['original_dup_interval_sub_classification'] = sub_classification
         dup_summary_dict['original_dup_interval_contain_big_gap'] = big_gap_dup
 
-        if major_classification == "Copy Neutral" or major_classification == "Unknown" or major_classification == "Reference Error" or big_gap_dup == True:
+        if major_classification == "Copy Neutral" or major_classification == "Unknown" or major_classification == "Reference Error" or big_gap_dup == True or dup_interval_size > 1000000:
             print(f"The DUP interval's classification is {major_classification} and it will not be corrected")
             # Assign the attributes associated with corrected interval to NA
             dup_summary_dict['corrected_interval'] = np.nan

@@ -402,6 +402,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
     del_flankings_sum_dict = {}
     del_chrom, del_pos, del_end = parse_interval(del_interval)
     del_interval_size = interval_size(del_interval)
+    # Add interval size check
+    if del_interval_size > 1000000:
+        print("DEL interval is too large")
+        return None
     """
     Flanking logic: if DEL is less than 1000 bp, flanking regions are 1000 bp on both sides. If 1000bp is
     not enough to have alignments in HG2, then increase the flanking region size by 1000 bp until there are
@@ -499,6 +503,8 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
     # Otherwise, no evidence for DEL event
     distance_between_flankings_list = []
     flanking_connection_strand_list = []
+    left_aligned_interval_list = []
+    right_aligned_interval_list = []
     for left_flanking_interval, strand, q_start, q_end in left_flanking_interval_aligned[1]:
         if left_flanking_interval in left_flanking_hg2_alignment_intervals:
             if strand == 1:
@@ -509,6 +515,8 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                               matching_right_flanking_interval)
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("POS")
+                    left_aligned_interval_list.append(left_flanking_interval)
+                    right_aligned_interval_list.append(matching_right_flanking_interval)
                     if distance_between_flankings < int(del_interval_size) * 0.5:
                         print('********** Potential DEL **********')
                     else:
@@ -522,6 +530,8 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                               matching_right_flanking_interval)
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("NEG")
+                    left_aligned_interval_list.append(left_flanking_interval)
+                    right_aligned_interval_list.append(matching_right_flanking_interval)
                     if distance_between_flankings < int(del_interval_size) * 0.5:
                         print('********** Potential DEL **********')
                     else:
@@ -532,6 +542,8 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                 else:
                     distance_between_flankings_list.append(None)
                     flanking_connection_strand_list.append(None)
+                    left_aligned_interval_list.append(None)
+                    right_aligned_interval_list.append(None)
                     print(f"No matching right flanking interval for {left_flanking_interval}")
             elif strand == -1:
                 if find_previous_interval(left_flanking_interval, right_flanking_hg2_alignment_intervals):
@@ -541,6 +553,8 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                               matching_right_flanking_interval)
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("POS")
+                    left_aligned_interval_list.append(left_flanking_interval)
+                    right_aligned_interval_list.append(matching_right_flanking_interval)
                     if distance_between_flankings < int(del_interval_size) * 0.5:
                         print('********** Potential DEL**********')
                     else:
@@ -554,6 +568,8 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                               matching_right_flanking_interval)
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("NEG")
+                    left_aligned_interval_list.append(left_flanking_interval)
+                    right_aligned_interval_list.append(matching_right_flanking_interval)
                     if distance_between_flankings < int(del_interval_size) * 0.5:
                         print('********** Potential DEL **********')
                     else:
@@ -563,11 +579,15 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                 else:
                     distance_between_flankings_list.append(None)
                     flanking_connection_strand_list.append(None)
+                    left_aligned_interval_list.append(None)
+                    right_aligned_interval_list.append(None)
                     print(f"No matching right flanking interval for {left_flanking_interval}")
 
     # Add the distance between the flanking regions' alignments and strand to the dictionary
     del_flankings_sum_dict['distance_between_flankings'] = distance_between_flankings_list
     del_flankings_sum_dict['flanking_connection_strand'] = flanking_connection_strand_list
+    del_flankings_sum_dict['hg38_plotting_flanking_intervals'] = [del_interval, hg38_left_flanking_interval, hg38_right_flanking_interval]
+    del_flankings_sum_dict['hg2_plotting_flanking_intervals'] = left_aligned_interval_list + right_aligned_interval_list
 
     # Use the obtained details about the flanking regions to classify the DEL interval
     if len(left_flanking_hg38_alignment_intervals) > 1 and len(right_flanking_hg38_alignment_intervals) > 1 and len(distance_between_flankings_list) > 2:
@@ -610,6 +630,12 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
     del_flankings_sum_dict['classification'] = major_classification
     del_flankings_sum_dict['minor_classification'] = minor_classification
     return del_flankings_sum_dict
+
+def plot_del_flankings(del_interval, calling_reference_fasta: str, called_ref_aligner, truth_ref_aligner, plot_ratio=70, save_plot=False, save_plot_path=None):
+    del_flanking_dict = collect_del_flankings(del_interval, calling_reference_fasta, called_ref_aligner, truth_ref_aligner)
+    hg38_flanking_intervals = del_flanking_dict['hg38_plotting_flanking_intervals']
+    hg2_flanking_alignment_intervals = del_flanking_dict['hg2_plotting_flanking_intervals']
+    avu.PlotIntervals(hg38_flanking_intervals, hg2_flanking_alignment_intervals).plot_intervals_comparison(flanking=True, ratio=plot_ratio, save=save_plot, savepath=save_plot_path)
 
 
 
