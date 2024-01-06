@@ -1,6 +1,7 @@
 from typing import Optional, Tuple, List, Dict
 from collections import defaultdict
 from bisect import bisect_right
+import numpy as np
 
 import logging
 
@@ -388,7 +389,28 @@ def interval_within_interval(interval1: str, interval2: str) -> bool:
     if chrom1 != chrom2:
         raise ValueError("Intervals must be on the same chromosome")
 
-    elif start1 == start2 or end1 == end2:
-        return ValueError("Intervals should not be touching")
+    return start2 <= start1 and end1 <= end2
 
-    return start2 < start1 and end1 < end2
+def interval_overlapping_percentage(interval1, interval2):
+    chr1, pos1, end1 = parse_interval(interval1)
+    interval1_size = interval_size(interval1)
+    # Collect all the gaps that have overlap with the DUP interval
+    chr2, pos2, end2 = parse_interval(interval2)
+    interval2_size = interval_size(interval2)
+    if chr1 == chr2 and pos1 <= pos2 and end1 >= end2:
+        overlapping_interval = interval2
+    elif chr1 == chr2 and pos2 <= pos1 and end2 >= end1:
+        overlapping_interval = interval1
+    elif chr1 == chr2 and pos1 <= pos2 and end1 <= end2:
+        overlapping_interval = create_interval(chr1, pos2, end1)
+    elif chr1 == chr2 and pos2 <= pos1 and end2 <= end1:
+        overlapping_interval = create_interval(chr1, pos1, end2)
+    else:
+        overlapping_interval = None
+    if interval_size(overlapping_interval):
+        overlapping_interval_size = interval_size(overlapping_interval)
+        interval1_overlapping_percentage = np.round((overlapping_interval_size / interval1_size) * 100, 2)
+        interval2_overlapping_percentage = np.round((overlapping_interval_size / interval2_size) * 100, 2)
+    else:
+        interval1_overlapping_percentage, interval2_overlapping_percentage = 0, 0
+    return interval1_overlapping_percentage, interval2_overlapping_percentage
