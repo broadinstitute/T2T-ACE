@@ -628,8 +628,7 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                     del_hg2_chr, del_hg2_start, del_hg2_end = parse_interval(del_hg2_seq)
                     if distance_interval_chr == del_hg2_chr:
                         if min(interval_overlapping_percentage(distance_interval, del_hg2_seq)) > 0:
-                            print(del_hg2_seq, distance_interval,
-                                  interval_overlapping_percentage(distance_interval, del_hg2_seq))
+                            print(f"DEL HG2 alignment:{del_hg2_seq}; Interval Between HG2 Aligned Flankings:{distance_interval}; Overlapping:{interval_overlapping_percentage(distance_interval, del_hg2_seq)}")
     else:
         if distance_between_flankings_list.count(None) != len(distance_between_flankings_list):
             if None in distance_between_flankings_list:
@@ -662,7 +661,7 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                         del_hg2_chr, del_hg2_start, del_hg2_end = parse_interval(del_hg2_seq)
                         if distance_interval_chr == del_hg2_chr:
                             if min(interval_overlapping_percentage(distance_interval, del_hg2_seq)) >0:
-                                print(del_hg2_seq, distance_interval, interval_overlapping_percentage(distance_interval, del_hg2_seq))
+                                print(f"DEL HG2 alignment:{del_hg2_seq}; Interval Between HG2 Aligned Flankings:{distance_interval}; Overlapping:{interval_overlapping_percentage(distance_interval, del_hg2_seq)}")
         else:
             major_classification = 'Unknown'
             minor_classification = 'Unknown'
