@@ -19,3 +19,4 @@ seaborn
 scipy
 pysam
 mappy
+biopython
