@@ -1,5 +1,6 @@
 import logging
 import os
+import tempfile
 
 import mappy as mp
 from collections import Counter
@@ -152,7 +153,23 @@ def sum_cigar_events(cigar_str: str) -> str:
 
     return aggregated_cigar_str
 
-def get_multiseq_alignment(seq_list, seq_names):
+
+def get_multiseq_alignment(seq_list: List[str], seq_names: List[str]):
+    """
+    Perform a multiple sequence alignment using MAFFT.
+
+    Parameters:
+    seq_list (List[str]): List of sequences to align.
+    seq_names (List[str]): Corresponding names for the sequences.
+
+    Returns:
+    str: Path to the aligned sequences file.
+
+    Raises:
+    IOError: If file operations fail.
+    RuntimeError: If MAFFT alignment fails.
+    """
+
     multiseq_fasta = f"{seq_names[0]}_intervals.fasta"
     multiseq_aligned_file = f"{seq_names[0]}_intervals_mafft_aligned.fasta"
 
@@ -162,7 +179,7 @@ def get_multiseq_alignment(seq_list, seq_names):
     elif os.path.exists(multiseq_aligned_file):
         os.remove(multiseq_aligned_file)
 
-    # Start new aLignment
+    # Start new alignment
     # Get the sequences in FASTA format
     for seq, name in zip(seq_list, seq_names):
         with open(multiseq_fasta, "a") as f:

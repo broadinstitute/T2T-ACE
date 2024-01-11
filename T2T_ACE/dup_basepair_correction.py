@@ -1,12 +1,13 @@
 import numpy as np
+from typing import Tuple
 from T2T_ACE.validator import align_interval
 from T2T_ACE.interval_parsing import parse_interval, interval_size, create_interval
 
 
 # DUP basepair correction function of T2T-ACE
 # It will extend the DUP interval to the right until no more copies are found
-def extend_2_right(dup_interval, calling_reference_fasta, called_ref_aligner,
-                                 truth_ref_aligner):
+def extend_2_right(dup_interval: str, calling_reference_fasta: str, called_ref_aligner,
+                   truth_ref_aligner) -> Tuple[str, int]:
     chr, pos, end = parse_interval(dup_interval)
     if chr == "chrX" or chr == "chrY":
         print("Basepair correction Method doesn't support DUPs on chrX or chrY")
@@ -88,8 +89,8 @@ def extend_2_right(dup_interval, calling_reference_fasta, called_ref_aligner,
 
 # This function is part of the basepair correction function of T2T-ACE
 # It will extend the DUP interval to the left until no more copies are found
-def extend_2_left(dup_interval, calling_reference_fasta, called_ref_aligner,
-                                 truth_ref_aligner):
+def extend_2_left(dup_interval: str, calling_reference_fasta: str, called_ref_aligner,
+                  truth_ref_aligner) -> Tuple[str, int]:
     chr, pos, end = parse_interval(dup_interval)
     if chr == "chrX" or chr == "chrY":
         print("Basepair correction Method doesn't support DUPs on chrX or chrY")
@@ -114,7 +115,8 @@ def extend_2_left(dup_interval, calling_reference_fasta, called_ref_aligner,
 
         q_start_list = sorted([q_st for interval, strand, q_st, q_en in new_alignments[1]])
         q_start_count = [[q_start, q_start_list.count(q_start)] for q_start in sorted(set(q_start_list))]
-        # If only the two matches are at the beginning of the alignment, then the interval pos needs to be moved to the right
+        # If only the two matches are at the beginning of the alignment,
+        # then the interval pos needs to be moved to the right
         if q_start_count[0][1] == 2 and q_start_count[-1][0] != 1:
             print("new interval", new_interval, interval_size(new_interval))
             print(q_start_count)
