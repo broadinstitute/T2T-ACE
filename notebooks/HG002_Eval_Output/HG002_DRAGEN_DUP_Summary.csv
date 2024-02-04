@@ -1,0 +1,116 @@
+interval,dup_interval_size,original_hg38_hit_count,original_hg2_hit_count,original_hg2_mat_hit_count,original_hg2_pat_hit_count,original_dup_interval_major_classification,original_dup_interval_sub_classification,original_dup_interval_contain_big_gap,corrected_interval,corrected_interval_size,expanded_length,corrected_hg38_hit_count,corrected_hg2_hit_count,corrected_hg2_mat_hit_count,corrected_hg2_pat_hit_count,corrected_dup_interval_major_classification,corrected_dup_interval_sub_classification,corrected_pos_accuracy,corrected_end_accuracy
+chr1:789481-224014488,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+chr1:13225212-13247040,21829,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr1:13220889-13262322,41434,19605,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,0
+chr1:16605768-16645359,39592,1,5,2,3,Duplication,Homozygous Duplication,False,chr1:16558260-16660888,102629,63037,1,5,2,3,Duplication,Homozygous Duplication,0,0
+chr1:16715826-16727637,11812,1,5,2,3,Duplication,Homozygous Duplication,False,chr1:16680842-16733508,52667,40855,1,5,2,3,Duplication,Homozygous Duplication,1,0
+chr1:16879014-16949283,70270,1,4,2,2,Duplication,Homozygous Duplication,False,chr1:16859848-16954363,94516,24246,1,4,2,2,Duplication,Homozygous Duplication,1,1
+chr1:143207550-143272360,64811,1,0,0,0,Reference Error,hg38 Reference Error,False,,,,,,,,,,,
+chr1:248407553-248446847,39295,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr1:248408713-248458616,49904,10609,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,1
+chr2:16225124-16226720,1597,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr2:74330292-74331319,1028,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr2:74330192-74331412,1221,193,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr2:89673674-89790690,117017,2,5,3,2,Duplication,Maternal Heterozygous Duplication,True,,,,,,,,,,,
+chr2:89795582-89851643,56062,1,4,2,2,Duplication,Homozygous Duplication,False,chr2:89790569-89948272,157704,101642,1,4,2,2,Duplication,Homozygous Duplication,1,0
+chr2:91408761-91423450,14690,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr2:122526667-122536995,10329,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr2:122526668-122536998,10331,2,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,1
+chr3:75683120-75707351,24232,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr3:90558126-90571944,13819,2,2,0,2,Copy Neutral,Paternal Copy Neutral,True,,,,,,,,,,,
+chr3:146672617-146677378,4762,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr3:195690502-195719916,29415,1,5,3,2,Duplication,Homozygous Duplication,False,chr3:195614410-195725351,110942,81527,1,4,2,2,Duplication,Homozygous Duplication,1,0
+chr3:195719916-195750438,30523,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr3:195646680-195750929,104250,73727,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,1
+chr4:98892636-98895948,3313,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr4:98892349-98895950,3602,289,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr6:256330-381943,125614,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr6:256507-382462,125956,342,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,1
+chr6:35786783-35799008,12226,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr6:35786784-35799012,12229,3,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,1
+chr6:54059859-54063911,4053,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr6:61369114-61373011,3898,2,6,2,4,Duplication,Paternal Heterozygous Duplication,True,,,,,,,,,,,
+chr7:5167735-5169588,1854,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr7:5167666-5169772,2107,253,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,1
+chr7:61046337-61058297,11961,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr7:62297272-62310556,13285,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr7:62335995-62348128,12134,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr7:62384728-62408371,23644,1,4,2,2,Duplication,Homozygous Duplication,False,chr7:62384732-62408834,24103,459,1,4,2,2,Duplication,Homozygous Duplication,1,1
+chr7:76996951-76998017,1067,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr7:97773327-97791166,17840,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr7:100956437-100972041,15605,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr7:142341670-142353249,11580,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr8:26998867-27000496,1630,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr8:26998868-27000581,1714,84,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,1
+chr9:6378333-6382432,4100,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr9:40867979-41021827,153849,1,4,2,2,Duplication,Homozygous Duplication,False,chr9:40554879-41182033,627155,473306,1,4,2,2,Duplication,Homozygous Duplication,1,1
+chr9:42261252-42329816,68565,2,6,3,3,Duplication,Homozygous Duplication,False,chr9:42162226-42329817,167592,99027,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,1
+chr9:133063338-133082051,18714,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr9:133060136-133083858,23723,5009,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr10:38952112-38966576,14465,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr10:39364453-39376272,11820,1,6,5,1,Duplication,Maternal Heterozygous Duplication,False,chr10:39363271-39376273,13003,1183,1,3,2,1,Duplication,Maternal Heterozygous Duplication,0,1
+chr10:39405021-39411635,6615,1,4,1,3,Duplication,Paternal Heterozygous Duplication,False,chr10:39404359-39409793,5435,-1180,1,4,1,3,Duplication,Paternal Heterozygous Duplication,0,1
+chr10:41842555-41856175,13621,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr10:46514225-46561077,46853,1,5,3,2,Duplication,Homozygous Duplication,False,chr10:46396229-46598510,202282,155429,1,5,3,2,Duplication,Homozygous Duplication,1,0
+chr11:18922909-18942369,19461,1,4,2,2,Duplication,Homozygous Duplication,False,chr11:18917535-18952100,34566,15105,1,4,2,2,Duplication,Homozygous Duplication,1,0
+chr11:50653375-50655011,1637,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr11:50653213-50655176,1964,327,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,0
+chr11:54934938-54937858,2921,1,4,3,1,Duplication,Maternal Heterozygous Duplication,False,chr11:54934693-54938150,3458,537,1,4,3,1,Duplication,Maternal Heterozygous Duplication,1,1
+chr11:55247450-55248987,1538,1,4,2,2,Duplication,Homozygous Duplication,False,chr11:55247298-55249295,1998,460,1,4,2,2,Duplication,Homozygous Duplication,1,1
+chr11:68207058-68208264,1207,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr11:68206961-68208469,1509,302,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr12:21355-60453,39099,1,5,2,3,Duplication,Homozygous Duplication,False,chr12:22902-79029,56128,17029,1,5,2,3,Duplication,Homozygous Duplication,1,1
+chr12:37253891-37255142,1252,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr12:59552851-59559206,6356,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr12:79757409-79768989,11581,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr12:79761109-79768989,7881,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr12:79760922-79769044,8123,242,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr12:90831753-90833460,1708,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr12:90831754-90833461,1708,0,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr12:93451020-93452830,1811,1,4,1,3,Duplication,Paternal Heterozygous Duplication,False,chr12:93450944-93452870,1927,116,1,4,1,3,Duplication,Paternal Heterozygous Duplication,1,1
+chr14:16095815-16127603,31789,4,8,4,4,Copy Neutral,Biallelic Copy Neutral,True,,,,,,,,,,,
+chr14:18656545-18694958,38414,1,4,3,1,Duplication,Maternal Heterozygous Duplication,False,chr14:18585026-18712645,127620,89206,1,4,3,1,Duplication,Maternal Heterozygous Duplication,1,0
+chr14:19725013-19956413,231401,1,4,2,2,Duplication,Homozygous Duplication,False,chr14:19611714-19956598,344885,113484,1,4,2,2,Duplication,Homozygous Duplication,0,1
+chr14:105616092-105632532,16441,1,4,2,2,Duplication,Homozygous Duplication,False,chr14:105612977-105649912,36936,20495,1,4,2,2,Duplication,Homozygous Duplication,1,1
+chr15:17025016-17083232,58217,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr15:20212550-20376210,163661,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr15:19993302-20428913,435612,271951,1,3,2,1,Duplication,Maternal Heterozygous Duplication,1,0
+chr15:20384360-20421468,37109,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr15:20383545-20428913,45369,8260,1,3,2,1,Duplication,Maternal Heterozygous Duplication,0,0
+chr15:20645359-20673571,28213,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr15:20504965-20689305,184341,156128,1,3,2,1,Duplication,Maternal Heterozygous Duplication,0,0
+chr15:21259041-21272032,12992,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr15:21242091-21298006,55916,42924,1,3,2,1,Duplication,Maternal Heterozygous Duplication,0,0
+chr15:23047135-23049846,2712,1,4,3,1,Duplication,Maternal Heterozygous Duplication,False,chr15:23046051-23050549,4499,1787,1,3,2,1,Duplication,Maternal Heterozygous Duplication,0,1
+chr16:14955579-15026070,70492,1,4,2,2,Duplication,Homozygous Duplication,False,chr16:14927623-15030408,102786,32294,1,4,2,2,Duplication,Homozygous Duplication,0,1
+chr16:21508511-21583073,74563,1,4,2,2,Duplication,Homozygous Duplication,False,chr16:21397593-21584970,187378,112815,1,4,2,2,Duplication,Homozygous Duplication,1,1
+chr16:22614542-22699638,85097,1,4,2,2,Duplication,Homozygous Duplication,False,chr16:22436935-22699639,262705,177608,1,4,2,2,Duplication,Homozygous Duplication,1,1
+chr16:34163911-34184726,20816,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr16:70149443-70163608,14166,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr16:70117234-70203693,86460,72294,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr16:74326633-74374467,47835,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr17:21661223-21677785,16563,1,4,2,2,Duplication,Homozygous Duplication,False,chr17:21656265-21679442,23178,6615,1,4,2,2,Duplication,Homozygous Duplication,0,0
+chr17:21815040-21825911,10872,1,4,2,2,Duplication,Homozygous Duplication,False,chr17:21814104-21825912,11809,937,1,4,2,2,Duplication,Homozygous Duplication,0,1
+chr17:21986665-21987716,1052,1,1,1,0,Copy Neutral,Maternal Copy Neutral,False,,,,,,,,,,,
+chr17:21987501-21992057,4557,1,1,1,0,Copy Neutral,Maternal Copy Neutral,False,,,,,,,,,,,
+chr17:22130211-22156606,26396,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr17:45572503-45585288,12786,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr17:45529199-45585864,56666,43880,1,3,2,1,Duplication,Maternal Heterozygous Duplication,0,0
+chr17:45578419-46289344,710926,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr17:46135409-46292238,156830,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr17:46135409-46292239,156831,1,1,3,1,2,Duplication,Paternal Heterozygous Duplication,0,1
+chr17:46135409-46282220,146812,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr17:46135407-46282221,146815,3,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr17:46205463-46208952,3490,1,4,1,3,Duplication,Paternal Heterozygous Duplication,False,chr17:46179290-46209240,29951,26461,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,0
+chr19:5849780-5851939,2160,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr19:5849781-5852203,2423,263,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr19:24330002-24405855,75854,1,4,2,2,Duplication,Homozygous Duplication,False,chr19:24330413-24412722,82310,6456,1,4,2,2,Duplication,Homozygous Duplication,1,1
+chr19:24895925-24906799,10875,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,True,,,,,,,,,,,
+chr19:27346020-27398099,52080,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr19:37788498-37789596,1099,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr19:37788388-37789805,1418,319,1,3,2,1,Duplication,Maternal Heterozygous Duplication,0,1
+chr19:54769183-54834015,64833,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr20:28556315-28631378,75064,1,6,3,3,Duplication,Homozygous Duplication,False,chr20:28557054-28638885,81832,6768,1,6,3,3,Duplication,Homozygous Duplication,1,0
+chr20:28769370-28771412,2043,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr20:28768962-28771616,2655,612,1,3,2,1,Duplication,Maternal Heterozygous Duplication,0,1
+chr20:28803480-28825404,21925,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr20:28861495-28897224,35730,3,5,3,2,Unknown,Unknown,True,,,,,,,,,,,
+chr20:29053186-29124948,71763,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr20:29253752-29256190,2439,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr20:29253508-29256387,2880,441,1,3,1,2,Duplication,Paternal Heterozygous Duplication,0,1
+chr20:29256956-29260879,3924,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr20:29256564-29262053,5490,1566,1,3,1,2,Duplication,Paternal Heterozygous Duplication,0,0
+chr20:29644047-29669931,25885,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr20:30812446-30840639,28194,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr20:30928918-30942616,13699,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,
+chr21:8998786-9041715,42930,1,6,2,4,Duplication,Homozygous Duplication,False,chr21:8986605-9047197,60593,17663,1,6,2,4,Duplication,Homozygous Duplication,0,0
+chr21:10325000-10467307,142308,1,6,3,3,Duplication,Homozygous Duplication,False,chr21:10324328-10467308,142981,673,1,6,3,3,Duplication,Homozygous Duplication,0,1
+chr21:10794968-10812865,17898,1,6,2,4,Duplication,Homozygous Duplication,False,chr21:10719797-10814561,94765,76867,1,6,1,5,Duplication,Paternal Heterozygous Duplication,0,0
+chr21:12965933-12991039,25107,1,4,2,2,Duplication,Homozygous Duplication,False,chr21:12965809-12998106,32298,7191,1,4,2,2,Duplication,Homozygous Duplication,0,1
+chr21:13872111-13895233,23123,1,3,1,2,Duplication,Paternal Heterozygous Duplication,False,chr21:13865177-13895233,30057,6934,1,3,1,2,Duplication,Paternal Heterozygous Duplication,1,1
+chr22:10711692-10742589,30898,1,1,1,0,Reference Error,hg38 Reference Error,False,,,,,,,,,,,
+chr22:10757240-10784385,27146,1,1,1,0,Reference Error,hg38 Reference Error,False,,,,,,,,,,,
+chr22:11030947-11067599,36653,1,6,3,3,Duplication,Homozygous Duplication,False,chr22:11031003-11067600,36598,-55,1,6,3,3,Duplication,Homozygous Duplication,1,1
+chr22:11307970-11377964,69995,1,4,2,2,Duplication,Homozygous Duplication,False,chr22:11269740-11378057,108318,38323,1,4,2,2,Duplication,Homozygous Duplication,1,0
+chr22:11568866-11630594,61729,1,4,2,2,Duplication,Homozygous Duplication,False,chr22:11547338-11631289,83952,22223,1,4,2,2,Duplication,Homozygous Duplication,0,0
+chr22:12406545-12424826,18282,1,4,2,2,Duplication,Homozygous Duplication,False,chr22:12342567-12438691,96125,77843,1,4,2,2,Duplication,Homozygous Duplication,1,0
+chr22:12589855-12638975,49121,1,4,2,2,Duplication,Homozygous Duplication,False,chr22:12521090-12641731,120642,71521,1,4,2,2,Duplication,Homozygous Duplication,1,0
+chr22:23996246-24007899,11654,1,3,2,1,Duplication,Maternal Heterozygous Duplication,False,chr22:23996246-24008369,12124,470,1,3,2,1,Duplication,Maternal Heterozygous Duplication,0,1
+chrX:49017567-49018675,1109,1,2,2,0,Duplication,Maternal Heterozygous Duplication,False,chrX:49017567-49018676,1110,1,1,2,2,0,Duplication,Maternal Heterozygous Duplication,0,0
+chrY:10670735-10691642,20908,3,3,0,3,Copy Neutral,Paternal Copy Neutral,True,,,,,,,,,,,
+chrY:10670736-10674040,3305,1,1,0,1,Copy Neutral,Paternal Copy Neutral,False,,,,,,,,,,,
+chrY:11333248-11360005,26758,1,1,0,1,Copy Neutral,Paternal Copy Neutral,False,,,,,,,,,,,
+chrY:56822082-56838588,16507,1,1,0,1,Copy Neutral,Paternal Copy Neutral,False,,,,,,,,,,,
+chrY:56844089-56883569,39481,1,6,2,4,Duplication,Homozygous Duplication,False,chrY:56844092-56883570,39479,-2,1,6,2,4,Duplication,Homozygous Duplication,1,0

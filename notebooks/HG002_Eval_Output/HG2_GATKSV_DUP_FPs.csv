@@ -1,0 +1,44 @@
+interval,dup_interval_size,original_hg38_hit_count,original_hg2_hit_count,original_hg2_mat_hit_count,original_hg2_pat_hit_count,original_dup_interval_major_classification,original_dup_interval_sub_classification,original_dup_interval_contain_big_gap,corrected_interval,corrected_interval_size,expanded_length,corrected_hg38_hit_count,corrected_hg2_hit_count,corrected_hg2_mat_hit_count,corrected_hg2_pat_hit_count,corrected_dup_interval_major_classification,corrected_dup_interval_sub_classification,corrected_pos_accuracy,corrected_end_accuracy,algorithm
+chr1:120807836-120813836,6001,5,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr1:149190101-149217001,26901,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr2:97053001-97076001,23001,3,6,3,3,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr2:97616201-97625001,8801,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr2:110316001-110323301,7301,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr5:70691501-70697808,6308,6,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr5:175905325-175913325,8001,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr7:6790901-6807001,16101,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr7:56368001-56373101,5101,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr7:56947001-56966243,19243,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr7:63322780-63334780,12001,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr7:63564780-63578780,14001,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr7:63650001-63654001,4001,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,"depth,manta"
+chr7:77020001-77034780,14780,6,6,2,4,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr7:142342001-142352780,10780,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr8:2437001-2443001,6001,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr8:7253701-7296001,42301,6,6,6,0,Copy Neutral,Maternal Copy Neutral,False,,,,,,,,,,,,depth
+chr8:7520001-7599001,79001,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr8:7712701-7721101,8401,6,6,5,1,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr8:8013001-8070001,57001,4,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr9:39772901-39789001,16101,4,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr9:65251001-65261001,10001,6,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr9:65657192-65715192,58001,5,6,4,2,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr13:52254107-52289001,34895,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr14:23957714-23963714,6001,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr14:105235638-105240838,5201,6,6,5,1,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr15:17027301-17059001,31701,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr15:32154001-32164401,10401,2,4,2,2,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,"depth,manta"
+chr15:32388001-32393601,5601,6,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr15:101968001-101980067,12067,6,6,4,2,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr16:21474487-21480487,6001,5,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr16:22442487-22454487,12001,3,6,3,3,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr16:29506487-29536487,30001,6,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr17:45573981-45617001,43021,1,1,1,0,Copy Neutral,Maternal Copy Neutral,False,,,,,,,,,,,,depth
+chr19:54770875-54829001,58127,1,2,1,1,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr22:18176011-18195001,18991,6,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chr22:18736601-18830001,93401,3,6,3,3,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr22:21169565-21305565,136001,3,6,3,3,Copy Neutral,Biallelic Copy Neutral,False,,,,,,,,,,,,depth
+chr22:50796401-50807366,10966,6,6,3,3,Unknown,Unknown,False,,,,,,,,,,,,depth
+chrX:144125382-144145382,20001,2,3,2,1,Unknown,Unknown,False,,,,,,,,,,,,depth
+chrX:144167382-144175382,8001,2,3,2,1,Unknown,Unknown,False,,,,,,,,,,,,depth
+chrY:5605389-5613389,8001,1,1,0,1,Copy Neutral,Paternal Copy Neutral,False,,,,,,,,,,,,depth
+chrY:11338389-11361389,23001,1,1,0,1,Copy Neutral,Paternal Copy Neutral,False,,,,,,,,,,,,depth
