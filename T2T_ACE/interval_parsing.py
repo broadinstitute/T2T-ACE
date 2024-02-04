@@ -327,6 +327,7 @@ def interval_between_intervals(interval1: str, interval2: str) -> str:
     Example:
         >>> interval_between_intervals("chr1:100-200", "chr1:300-400")
         "chr1:201-299"
+    YG UPDATE: Allow touching intervals
     """
     chrom1, start1, end1 = parse_interval(interval1)
     chrom2, start2, end2 = parse_interval(interval2)
@@ -335,16 +336,16 @@ def interval_between_intervals(interval1: str, interval2: str) -> str:
         raise ValueError("Intervals must be on the same chromosome")
 
     chr_name = chrom1
-
-    if start1 - end2 == 1 or start2 - end1 == 1:
-        raise ValueError("Intervals should not be touching")
+    #
+    # if start1 - end2 == 1 or start2 - end1 == 1:
+    #     raise ValueError("Intervals should not be touching")
 
     if start1 > end2:
         return f"{chr_name}:{end2 + 1}-{start1 - 1}"
     elif start2 > end1:
         return f"{chr_name}:{end1 + 1}-{start2 - 1}"
-    else:
-        raise ValueError("Intervals should not be overlapping")
+    # else:
+    #     raise ValueError("Intervals should not be overlapping")
 
 def get_reversed_sequence(sequence: str) -> str:
     """

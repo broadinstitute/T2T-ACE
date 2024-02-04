@@ -10,6 +10,7 @@ from Bio.Align.Applications import MafftCommandline
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
+mafft_exe = "/opt/homebrew/bin/mafft"
 
 
 class Config:
@@ -44,7 +45,7 @@ def load_reference(reference: str) -> mp.Aligner:
             print(e)
     """
     logging.info(f"Loading reference from: {reference}")
-    aligner = mp.Aligner(reference, scoring=Config.SCORING)
+    aligner = mp.Aligner(reference, scoring=Config.SCORING, best_n=10, n_threads=4)
     if not aligner:
         raise ReferenceLoadError(f"ERROR: failed to load/build {reference} reference file.")
     return aligner
@@ -169,7 +170,7 @@ def get_multiseq_alignment(seq_list, seq_names):
             f.write(f">{name}\n{seq}\n")
     # Perform multiseq alignment using MAFFT
     print(f"Running MAFFT alignment for {multiseq_fasta}")
-    mafft_cline = MafftCommandline(input=multiseq_fasta, clustalout="on")
+    mafft_cline = MafftCommandline(mafft_exe, input=multiseq_fasta, clustalout="on")
     mafft_cline(stdout=multiseq_aligned_file)
 
 
