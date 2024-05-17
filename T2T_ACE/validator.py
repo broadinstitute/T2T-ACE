@@ -465,12 +465,16 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
             break
         hg38_left_flanking_interval = create_interval(del_chrom, left_flanking_pos, left_flanking_end)
         hg38_right_flanking_interval = create_interval(del_chrom, right_flanking_pos, right_flanking_end)
-
+        # Create a merged flanking intervals
+        merged_flanking_seq = get_sequence_from_interval(calling_reference_fasta, hg38_left_flanking_interval)+get_sequence_from_interval(calling_reference_fasta, hg38_right_flanking_interval)
         # Align the flanking intervals to the reference genome and HG2
         left_flanking_interval_aligned = align_interval(hg38_left_flanking_interval, calling_reference_fasta, called_ref_aligner,
                                                           truth_ref_aligner)
         right_flanking_interval_aligned = align_interval(hg38_right_flanking_interval, calling_reference_fasta, called_ref_aligner,
                                                           truth_ref_aligner)
+        # Align the merged flanking sequence to HG2
+        # The aligned region in HG2 should be 80% - 120% of the merged flanking sequence
+        merged_flanking_seq_alignments = [[extract_interval_from_hit(_), _.strand, _.q_st, _.q_en, _.r_en, _.r_st] for _ in truth_ref_aligner.map(merged_flanking_seq) if (_.q_en - _.q_st + 1)*0.8 < (_.r_en - _.r_st + 1) < (_.q_en - _.q_st + 1)*1.2]
         # Gather the intervals of flanking region alignments in reference genome (hg38)
         # The alignments in hg38 and HG2 should be on the same chromosome as the DEL interval
         # If more than 1, it means this DEL interval might exist in a DUP region
@@ -481,12 +485,14 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
         # Gather the intervals of flanking region alignments in HG2
         left_flanking_hg2_alignment_intervals = [interval for interval, strand, q_start, q_end in left_flanking_interval_aligned[1] if f"{del_chrom}_" in interval]
         right_flanking_hg2_alignment_intervals = [interval for interval, strand, q_start, q_end in right_flanking_interval_aligned[1] if f"{del_chrom}_" in interval]
+        merged_flanking_hg2_alignment_intervals = [interval for interval, strand, q_start, q_end, r_en, r_st in merged_flanking_seq_alignments if f"{del_chrom}_" in interval]
 
         # Print out the flanking intervals, their sizes, and the number of alignments in HG002
         print(
             f"left flanking interval: {hg38_left_flanking_interval}, {interval_size(hg38_left_flanking_interval)}, {len(left_flanking_hg38_alignment_intervals)}, {len(left_flanking_hg2_alignment_intervals)}")
         print(
             f"right flanking interval: {hg38_right_flanking_interval}, {interval_size(hg38_right_flanking_interval)}, {len(right_flanking_hg38_alignment_intervals)}, {len(right_flanking_hg2_alignment_intervals)}")
+        print(f"merged flanking sequence: {len(merged_flanking_seq)}, {merged_flanking_hg2_alignment_intervals}")
 
         # Increase the flanking size by 1000bp if there is less than two alignments in HG002
         # 1000 is arbitrary. But it seems to work well for most of the cases.
