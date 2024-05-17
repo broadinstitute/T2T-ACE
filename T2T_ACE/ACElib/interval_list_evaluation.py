@@ -1,6 +1,10 @@
 import pandas as pd
-import T2T_ACE.duplication_evaluation as duplication_evaluation
-import T2T_ACE.validator as v
+import duplication_evaluation as duplication_evaluation
+import validator as v
+
+def read_vcf(vcf_path):
+    df = pd.read_csv(vcf_path, comment='#', sep='\t', header=None, names=['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE'])
+    return df
 
 class eval_interval_list:
     def __init__(self, interval_list, calling_reference_fasta, truth_reference_fasta, called_ref_aligner, truth_ref_aligner):
