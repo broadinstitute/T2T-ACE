@@ -44,6 +44,6 @@ print('Input DUP intervals:', len(dup_pass_intervals))
 # Evaluate the DUP CNV calls
 dup_eval_sum_df = IntervalListEvaluation.eval_interval_list(dup_pass_intervals, hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).create_dup_sum()
 
-# TODO: Evaluate the DEL CNV calls
+# TODO: Evaluate the DEL CNV calls. Currently, the code is not working for DEL CNV calls.
 
 dup_eval_sum_df.to_csv('output_dup_eval_sum.csv', index=False)
