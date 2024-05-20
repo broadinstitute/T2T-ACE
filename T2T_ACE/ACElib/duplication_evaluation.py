@@ -1,13 +1,16 @@
 import numpy as np
 import pandas as pd
-from T2T_ACE.validator import align_interval, align_interval_no_restriction, reportAlignment, classifyDupInterval
-from T2T_ACE.interval_parsing import parse_interval, interval_size, create_interval
-import T2T_ACE.alignment_visualization_utilities as avu
-from T2T_ACE.dup_basepair_correction import extend_2_left, extend_2_right
+from .validator import align_interval, align_interval_no_restriction, reportAlignment, classifyDupInterval
+from .interval_parsing import parse_interval, interval_size, create_interval
+from . import alignment_visualization_utilities as avu
+from .dup_basepair_correction import extend_2_left, extend_2_right
 import matplotlib.pyplot as plt
+import os
 
 # Load unresolved intervals within hg38
-gap_df = pd.read_csv("../resources/ucsc_hg38_gap_region.txt", sep="\t", index_col=[0],header=None)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+ucsc_gap_filepath = os.path.join(current_dir, 'resources/ucsc_hg38_gap_region.txt')
+gap_df = pd.read_csv(ucsc_gap_filepath, sep="\t", index_col=[0],header=None)
 # Gather gap intervals from gap_df
 gap_intervals = [f"{row[1]}:{row[2]}-{row[3]}" for index,row in gap_df.iterrows()]
 

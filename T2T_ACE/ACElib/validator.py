@@ -2,19 +2,20 @@ import logging
 import numpy as np
 import pandas as pd
 import mappy
-
-from T2T_ACE.interval_parsing import create_interval
-from T2T_ACE.genomic_queries import get_sequence_from_interval, get_flanking_regions, get_region_around_deletion
-from T2T_ACE.interval_parsing import (parse_interval, find_next_interval, find_previous_interval,
+from . import alignment_utilities as au
+from . import alignment_visualization_utilities as avu
+import sys
+import os
+from.interval_parsing import create_interval
+from.genomic_queries import get_sequence_from_interval, get_flanking_regions, get_region_around_deletion
+from.interval_parsing import (parse_interval, find_next_interval, find_previous_interval,
                                       distance_between_intervals, interval_between_intervals, interval_within_interval,
                                       interval_size, get_reversed_sequence, interval_overlapping_percentage)
-import T2T_ACE.alignment_utilities as au
-import T2T_ACE.alignment_visualization_utilities as avu
-import sys
 
 # Load the chromosome sizes
-chrom_size_path = "../resources/hg38_chrom_size.txt"
-chrom_size_df = pd.read_csv(chrom_size_path, sep='\t', header=None, names=['chr', 'size'])
+current_dir = os.path.dirname(os.path.abspath(__file__))
+hg38_chrom_size_filepath = os.path.join(current_dir, 'resources/hg38_chrom_size.txt')
+chrom_size_df = pd.read_csv(hg38_chrom_size_filepath, sep='\t', header=None, names=['chr', 'size'])
 chrom_size_dict = {row['chr']: row['size'] for index, row in chrom_size_df.iterrows()}
 
 def log_error(level, msg, *args):

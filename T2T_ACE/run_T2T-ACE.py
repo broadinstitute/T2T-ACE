@@ -1,9 +1,8 @@
-import pandas as pd
-import T2T_ACE.ACElib.interval_list_evaluation as IntervalListEvaluation
-from T2T_ACE.ACElib.interval_list_evaluation import read_vcf
+import ACElib.interval_list_evaluation as IntervalListEvaluation
+from ACElib.interval_list_evaluation import read_vcf
 from ACElib.alignment_utilities import load_reference
 import argparse
-import pandas as pd
+
 
 argparser = argparse.ArgumentParser(description="T2T-ACE: A tool for evaluating CNV calls for genome with T2T assembly.")
 argparser.add_argument('-v', "--cnv_vcf_path", dest="cnv_vcf_path", help="Path to CNV VCF file in hg38.")

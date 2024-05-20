@@ -1,5 +1,5 @@
 from typing import Optional, Tuple
-from T2T_ACE.interval_parsing import parse_interval
+from .interval_parsing import parse_interval
 import pysam
 import logging
 

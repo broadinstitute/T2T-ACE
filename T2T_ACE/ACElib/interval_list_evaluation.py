@@ -1,6 +1,6 @@
 import pandas as pd
-import duplication_evaluation as duplication_evaluation
-import validator as v
+from .duplication_evaluation import eval_dup_interval
+from . import validator as v
 
 def read_vcf(vcf_path):
     df = pd.read_csv(vcf_path, comment='#', sep='\t', header=None, names=['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE'])
@@ -44,10 +44,10 @@ class eval_interval_list:
             print(interval)
             # If the interval returns True, then it is a valid interval and we can collect the results
             # If the interval returns False, then it is not a valid interval and we will fill the results with 'NA'
-            if duplication_evaluation.eval_dup_interval(interval, self.calling_reference_fasta,
+            if eval_dup_interval(interval, self.calling_reference_fasta,
                                                                          self.truth_reference_fasta, self.called_ref_aligner,
                                                                          self.truth_ref_aligner).analyzeDuplicationIntervals():
-                interval_sum_dict = duplication_evaluation.eval_dup_interval(interval, self.calling_reference_fasta,
+                interval_sum_dict = eval_dup_interval(interval, self.calling_reference_fasta,
                                                                              self.truth_reference_fasta, self.called_ref_aligner,
                                                                              self.truth_ref_aligner).analyzeDuplicationIntervals()
                 dup_interval_size_list.append(interval_sum_dict['dup_interval_size'])

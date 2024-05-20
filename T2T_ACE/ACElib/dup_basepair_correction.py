@@ -1,6 +1,6 @@
 import numpy as np
-from T2T_ACE.validator import align_interval
-from T2T_ACE.interval_parsing import parse_interval, interval_size, create_interval
+from .validator import align_interval
+from .interval_parsing import parse_interval, interval_size, create_interval
 
 
 # DUP basepair correction function of T2T-ACE
