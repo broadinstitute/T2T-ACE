@@ -8,6 +8,8 @@ argparser = argparse.ArgumentParser(description="T2T-ACE: A tool for evaluating 
 argparser.add_argument('-v', "--cnv_vcf_path", dest="cnv_vcf_path", help="Path to CNV VCF file in hg38.")
 argparser.add_argument('-t2t', "--t2t_ref", dest="t2t_ref", help="Path to T2T reference genome.")
 argparser.add_argument('-hg38', "--hg38_ref", dest="hg38_ref", help="Path to hg38 reference genome.")
+argparser.add_argument('-test', "--test", dest="test", help="If you want to just run a test on first 5 CNV calls.", type=bool)
+
 args = argparser.parse_args()
 
 vcf_path = args.cnv_vcf_path
@@ -17,6 +19,7 @@ hg38_ref_path = args.hg38_ref
 print("CNV VCF Path: ", vcf_path)
 print("T2T Reference Path: ", hg002t2t_ref_path)
 print("HG38 Reference Path: ", hg38_ref_path)
+print("Test: ", args.test)
 
 # Load the minimap2 aligner from reference fasta file
 # Load HG002 T2T reference
@@ -43,8 +46,11 @@ print('Number of DEL intervals within the Input VCF:', len(del_pass_intervals))
 print('Number of DEL intervals within the Input VCF:', len(dup_pass_intervals))
 
 print("Evaluating the CNV calls...")
-dup_eval_sum_df = IntervalListEvaluation.eval_interval_list(dup_pass_intervals[:5], hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).create_dup_sum()
-del_eval_sum_df = IntervalListEvaluation.eval_interval_list(del_pass_intervals[:5], hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).classify_list_of_DELs()
+if args.test:
+    del_pass_intervals = del_pass_intervals[:5]
+    dup_pass_intervals = dup_pass_intervals[:5]
+dup_eval_sum_df = IntervalListEvaluation.eval_interval_list(dup_pass_intervals, hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).create_dup_sum()
+del_eval_sum_df = IntervalListEvaluation.eval_interval_list(del_pass_intervals, hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).classify_list_of_DELs()
 
 
 dup_eval_sum_df.to_csv('output_dup_eval_sum.csv', index=False)
