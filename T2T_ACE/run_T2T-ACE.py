@@ -26,16 +26,18 @@ hg38 = load_reference(hg38_ref_path)
 
 # Get the CNV calls from the input VCF file
 HG2_cnv_vcf_df = read_vcf(vcf_path)
-pass_cnv_list = HG2_cnv_vcf_df[HG2_cnv_vcf_df['FILTER']=='PASS']
+print('Number of CNV calls in the VCF:', HG2_cnv_vcf_df.shape[0])
+passing_cnv_calls = HG2_cnv_vcf_df[HG2_cnv_vcf_df['FILTER'] == 'PASS']
+print('Number of CNV calls passing the filter:', passing_cnv_calls.shape[0])
 
 # Split the CNV calls into DEL and DUP
 del_pass_intervals = []
 dup_pass_intervals = []
 for index, row in HG2_cnv_vcf_df.iterrows():
     interval = row['CHROM'] + ':' + str(row['POS']) + '-' + str(row['INFO'].split('END=')[1].split(';')[0])
-    if row['ALT'] == '<DEL>':
+    if row['ALT'] == '<DEL>' and row['FILTER'] == 'PASS':
         del_pass_intervals.append(interval)
-    elif row['ALT'] == '<DUP>':
+    elif row['ALT'] == '<DUP>' and row['FILTER'] == 'PASS':
         dup_pass_intervals.append(interval)
 print('Number of DEL intervals within the Input VCF:', len(del_pass_intervals))
 print('Number of DEL intervals within the Input VCF:', len(dup_pass_intervals))

@@ -3,7 +3,13 @@ from .duplication_evaluation import eval_dup_interval
 from . import validator as v
 
 def read_vcf(vcf_path):
-    df = pd.read_csv(vcf_path, comment='#', sep='\t', header=None, names=['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT', 'SAMPLE'])
+    with open(vcf_path) as f:
+        for line in f:
+            if line.startswith("#CHROM"):
+                vcf_header_names = line.strip().split('\t')
+                break
+    new_vcf_header_names = [i.replace("#", "") for i in vcf_header_names]
+    df = pd.read_csv(vcf_path, comment='#', sep='\t', header=None, names=new_vcf_header_names)
     return df
 
 class eval_interval_list:
