@@ -633,15 +633,16 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
         else:
             major_classification = 'False DEL'
             minor_classification = 'False DEL'
-            print('----------- Checking DEL Sequence Alignment in HG2 -----------')
+            print(interval_between_matching_flankings_list)
+            print('----------- Checking DEL Sequence Alignment in HG2-----------')
             for distance_interval in [interval for interval in interval_between_matching_flankings_list if interval is not None]:
-                distance_interval_chr, distance_interval_start, distance_interval_end = parse_interval(
-                    distance_interval)
-                for del_hg2_seq in del_seq_hg2_alignment_intervals:
-                    del_hg2_chr, del_hg2_start, del_hg2_end = parse_interval(del_hg2_seq)
-                    if distance_interval_chr == del_hg2_chr:
-                        if min(interval_overlapping_percentage(distance_interval, del_hg2_seq)) > 0:
-                            print(f"DEL HG2 alignment:{del_hg2_seq}; Interval Between HG2 Aligned Flankings:{distance_interval}; Overlapping:{interval_overlapping_percentage(distance_interval, del_hg2_seq)}")
+                    distance_interval_chr, distance_interval_start, distance_interval_end = parse_interval(
+                        distance_interval)
+                    for del_hg2_seq in del_seq_hg2_alignment_intervals:
+                        del_hg2_chr, del_hg2_start, del_hg2_end = parse_interval(del_hg2_seq)
+                        if distance_interval_chr == del_hg2_chr:
+                            if min(interval_overlapping_percentage(distance_interval, del_hg2_seq)) > 0:
+                                print(f"DEL HG2 alignment:{del_hg2_seq}; Interval Between HG2 Aligned Flankings:{distance_interval}; Overlapping:{interval_overlapping_percentage(distance_interval, del_hg2_seq)}")
     else:
         if distance_between_flankings_list.count(None) != len(distance_between_flankings_list):
             if None in distance_between_flankings_list:
@@ -667,8 +668,9 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
             else:
                 major_classification = 'False DEL'
                 minor_classification = 'False DEL'
+                print(interval_between_matching_flankings_list)
                 print('----------- Checking DEL Sequence Alignment in HG2 -----------')
-                for distance_interval in interval_between_matching_flankings_list:
+                for distance_interval in [interval for interval in interval_between_matching_flankings_list if interval is not None]:
                     distance_interval_chr, distance_interval_start, distance_interval_end = parse_interval(distance_interval)
                     for del_hg2_seq in  del_seq_hg2_alignment_intervals:
                         del_hg2_chr, del_hg2_start, del_hg2_end = parse_interval(del_hg2_seq)

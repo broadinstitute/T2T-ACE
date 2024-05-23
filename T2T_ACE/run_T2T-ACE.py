@@ -52,6 +52,8 @@ if args.test:
 dup_eval_sum_df = IntervalListEvaluation.eval_interval_list(dup_pass_intervals, hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).create_dup_sum()
 del_eval_sum_df = IntervalListEvaluation.eval_interval_list(del_pass_intervals, hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).classify_list_of_DELs()
 
+#Degugging
+#IntervalListEvaluation.eval_interval_list(["chr2:35751954-35767502"], hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).classify_list_of_DELs()
 
 dup_eval_sum_df.to_csv('output_dup_eval_sum.csv', index=False)
 del_eval_sum_df.to_csv('output_del_eval_sum.csv', index=False)
