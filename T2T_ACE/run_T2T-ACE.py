@@ -6,8 +6,8 @@ import argparse
 
 argparser = argparse.ArgumentParser(description="T2T-ACE: A tool for evaluating CNV calls for genome with T2T assembly.")
 argparser.add_argument('-v', "--cnv_vcf_path", dest="cnv_vcf_path", help="Path to CNV VCF file in hg38.")
-argparser.add_argument('-rt', "--t2t_ref", dest="t2t_ref", help="Path to T2T reference genome.")
-argparser.add_argument('-rh', "--hg38_ref", dest="hg38_ref", help="Path to hg38 reference genome.")
+argparser.add_argument('-t2t', "--t2t_ref", dest="t2t_ref", help="Path to T2T reference genome.")
+argparser.add_argument('-hg38', "--hg38_ref", dest="hg38_ref", help="Path to hg38 reference genome.")
 args = argparser.parse_args()
 
 vcf_path = args.cnv_vcf_path
@@ -37,12 +37,13 @@ for index, row in HG2_cnv_vcf_df.iterrows():
         del_pass_intervals.append(interval)
     elif row['ALT'] == '<DUP>':
         dup_pass_intervals.append(interval)
-print('Input DEL intervals:', len(del_pass_intervals))
-print('Input DUP intervals:', len(dup_pass_intervals))
+print('Number of DEL intervals within the Input VCF:', len(del_pass_intervals))
+print('Number of DEL intervals within the Input VCF:', len(dup_pass_intervals))
 
-# Evaluate the DUP CNV calls
-dup_eval_sum_df = IntervalListEvaluation.eval_interval_list(dup_pass_intervals, hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).create_dup_sum()
+print("Evaluating the CNV calls...")
+dup_eval_sum_df = IntervalListEvaluation.eval_interval_list(dup_pass_intervals[:5], hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).create_dup_sum()
+del_eval_sum_df = IntervalListEvaluation.eval_interval_list(del_pass_intervals[:5], hg38_ref_path, hg002t2t_ref_path, hg38, hg002t2t).classify_list_of_DELs()
 
-# TODO: Evaluate the DEL CNV calls. Currently, the code is not working for DEL CNV calls.
 
 dup_eval_sum_df.to_csv('output_dup_eval_sum.csv', index=False)
+del_eval_sum_df.to_csv('output_del_eval_sum.csv', index=False)

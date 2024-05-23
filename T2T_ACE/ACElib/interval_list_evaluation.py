@@ -28,17 +28,6 @@ class eval_interval_list:
         original_dup_interval_major_classification_list = []
         original_dup_interval_sub_classification_list = []
         original_dup_interval_contain_big_gap_list = []
-        corrected_interval_list = []
-        corrected_interval_size_list = []
-        expanded_length_list = []
-        corrected_hg38_hit_count_list = []
-        corrected_hg2_hit_count_list = []
-        corrected_hg2_mat_hit_count_list = []
-        corrected_hg2_pat_hit_count_list = []
-        corrected_dup_interval_major_classification_list = []
-        corrected_dup_interval_sub_classification_list = []
-        corrected_pos_accuracy_list = []
-        corrected_end_accuracy_list = []
 
         for interval in self.interval_list:
             print(interval)
@@ -61,19 +50,6 @@ class eval_interval_list:
                     interval_sum_dict['original_dup_interval_sub_classification'])
                 original_dup_interval_contain_big_gap_list.append(
                     interval_sum_dict['original_dup_interval_contain_big_gap'])
-                corrected_interval_list.append(interval_sum_dict['corrected_interval'])
-                corrected_interval_size_list.append(interval_sum_dict['corrected_interval_size'])
-                expanded_length_list.append(interval_sum_dict['expanded_length'])
-                corrected_hg38_hit_count_list.append(interval_sum_dict['corrected_hg38_hit_count'])
-                corrected_hg2_hit_count_list.append(interval_sum_dict['corrected_hg2_hit_count'])
-                corrected_hg2_mat_hit_count_list.append(interval_sum_dict['corrected_hg2_mat_hit_count'])
-                corrected_hg2_pat_hit_count_list.append(interval_sum_dict['corrected_hg2_pat_hit_count'])
-                corrected_dup_interval_major_classification_list.append(
-                    interval_sum_dict['corrected_dup_interval_major_classification'])
-                corrected_dup_interval_sub_classification_list.append(
-                    interval_sum_dict['corrected_dup_interval_sub_classification'])
-                corrected_pos_accuracy_list.append(interval_sum_dict['corrected_pos_accuracy'])
-                corrected_end_accuracy_list.append(interval_sum_dict['corrected_end_accuracy'])
             else:
                 dup_interval_size_list.append('NA')
                 original_hg38_hit_count_list.append('NA')
@@ -83,17 +59,6 @@ class eval_interval_list:
                 original_dup_interval_major_classification_list.append('NA')
                 original_dup_interval_sub_classification_list.append('NA')
                 original_dup_interval_contain_big_gap_list.append('NA')
-                corrected_interval_list.append('NA')
-                corrected_interval_size_list.append('NA')
-                expanded_length_list.append('NA')
-                corrected_hg38_hit_count_list.append('NA')
-                corrected_hg2_hit_count_list.append('NA')
-                corrected_hg2_mat_hit_count_list.append('NA')
-                corrected_hg2_pat_hit_count_list.append('NA')
-                corrected_dup_interval_major_classification_list.append('NA')
-                corrected_dup_interval_sub_classification_list.append('NA')
-                corrected_pos_accuracy_list.append('NA')
-                corrected_end_accuracy_list.append('NA')
 
         hg2_dup_summary_df['dup_interval_size'] = dup_interval_size_list
         hg2_dup_summary_df['original_hg38_hit_count'] = original_hg38_hit_count_list
@@ -104,18 +69,6 @@ class eval_interval_list:
             'original_dup_interval_major_classification'] = original_dup_interval_major_classification_list
         hg2_dup_summary_df['original_dup_interval_sub_classification'] = original_dup_interval_sub_classification_list
         hg2_dup_summary_df['original_dup_interval_contain_big_gap'] = original_dup_interval_contain_big_gap_list
-        hg2_dup_summary_df['corrected_interval'] = corrected_interval_list
-        hg2_dup_summary_df['corrected_interval_size'] = corrected_interval_size_list
-        hg2_dup_summary_df['expanded_length'] = expanded_length_list
-        hg2_dup_summary_df['corrected_hg38_hit_count'] = corrected_hg38_hit_count_list
-        hg2_dup_summary_df['corrected_hg2_hit_count'] = corrected_hg2_hit_count_list
-        hg2_dup_summary_df['corrected_hg2_mat_hit_count'] = corrected_hg2_mat_hit_count_list
-        hg2_dup_summary_df['corrected_hg2_pat_hit_count'] = corrected_hg2_pat_hit_count_list
-        hg2_dup_summary_df[
-            'corrected_dup_interval_major_classification'] = corrected_dup_interval_major_classification_list
-        hg2_dup_summary_df['corrected_dup_interval_sub_classification'] = corrected_dup_interval_sub_classification_list
-        hg2_dup_summary_df['corrected_pos_accuracy'] = corrected_pos_accuracy_list
-        hg2_dup_summary_df['corrected_end_accuracy'] = corrected_end_accuracy_list
         return hg2_dup_summary_df
 
     # Classify all the DELs by DRAGEN with collect_del_flankings function in validator.py

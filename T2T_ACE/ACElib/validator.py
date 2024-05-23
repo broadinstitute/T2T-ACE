@@ -528,7 +528,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                           right_flanking_hg2_alignment_intervals)
                     distance_between_flankings = distance_between_intervals(left_flanking_interval,
                                                                               matching_right_flanking_interval)
-                    interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    if distance_between_flankings > 0:
+                        interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    else:
+                        interval_between_matching_flankings = None
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("POS")
                     left_aligned_interval_list.append(left_flanking_interval)
@@ -545,7 +548,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                               right_flanking_hg2_alignment_intervals)
                     distance_between_flankings = distance_between_intervals(left_flanking_interval,
                                                                               matching_right_flanking_interval)
-                    interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    if distance_between_flankings > 0:
+                        interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    else:
+                        interval_between_matching_flankings = None
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("NEG")
                     left_aligned_interval_list.append(left_flanking_interval)
@@ -570,7 +576,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                                 right_flanking_hg2_alignment_intervals)
                     distance_between_flankings = distance_between_intervals(left_flanking_interval,
                                                                               matching_right_flanking_interval)
-                    interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    if distance_between_flankings > 0:
+                        interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    else:
+                        interval_between_matching_flankings = None
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("POS")
                     left_aligned_interval_list.append(left_flanking_interval)
@@ -587,7 +596,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                               right_flanking_hg2_alignment_intervals)
                     distance_between_flankings = distance_between_intervals(left_flanking_interval,
                                                                               matching_right_flanking_interval)
-                    interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    if distance_between_flankings > 0:
+                        interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    else:
+                        interval_between_matching_flankings = None
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("NEG")
                     left_aligned_interval_list.append(left_flanking_interval)
@@ -622,7 +634,7 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
             major_classification = 'False DEL'
             minor_classification = 'False DEL'
             print('----------- Checking DEL Sequence Alignment in HG2 -----------')
-            for distance_interval in interval_between_matching_flankings_list:
+            for distance_interval in [interval for interval in interval_between_matching_flankings_list if interval is not None]:
                 distance_interval_chr, distance_interval_start, distance_interval_end = parse_interval(
                     distance_interval)
                 for del_hg2_seq in del_seq_hg2_alignment_intervals:

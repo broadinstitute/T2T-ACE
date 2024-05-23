@@ -176,12 +176,12 @@ class eval_dup_interval:
 
     def analyzeDuplicationIntervals(self):
         dup_summary_dict = {}
-        print("----------------------------------------------------------------")
-        print("Alignment Report of Original Interval")
-        print("----------------------------------------------------------------")
-
         chr, pos, end = parse_interval(self.dup_interval)
         dup_interval_size = interval_size(self.dup_interval)
+        print("----------------------------------------------------------------")
+        print(f"Alignment Report of {self.dup_interval} ({dup_interval_size:,}bp)")
+        print("----------------------------------------------------------------")
+
         if dup_interval_size > 1000000:
             print("DUP interval is too large")
             return None
@@ -233,95 +233,95 @@ class eval_dup_interval:
         dup_summary_dict['original_dup_interval_sub_classification'] = sub_classification
         dup_summary_dict['original_dup_interval_contain_big_gap'] = big_gap_dup
 
-        if major_classification == "Copy Neutral" or major_classification == "Unknown" or major_classification == "Reference Error" or big_gap_dup == True or dup_interval_size > 1000000:
-            print(f"The DUP interval's classification is {major_classification} and it will not be corrected")
-            # Assign the attributes associated with corrected interval to NA
-            dup_summary_dict['corrected_interval'] = np.nan
-            dup_summary_dict['corrected_interval_size'] = np.nan
-            dup_summary_dict['expanded_length'] = np.nan
-            dup_summary_dict['corrected_hg38_hit_count'] = np.nan
-            dup_summary_dict['corrected_hg2_hit_count'] = np.nan
-            dup_summary_dict['corrected_hg2_mat_hit_count'] = np.nan
-            dup_summary_dict['corrected_hg2_pat_hit_count'] = np.nan
-            dup_summary_dict['corrected_dup_interval_major_classification'] = np.nan
-            dup_summary_dict['corrected_dup_interval_sub_classification'] = np.nan
-            dup_summary_dict['corrected_pos_accuracy'] = np.nan
-            dup_summary_dict['corrected_end_accuracy'] = np.nan
-        # If the DUP interval is not a false duplication, then it might need to be corrected
-        else:
-            # Use hg2 alignments starts and ends to determine if the DUP interval needs to be adjusted
-            hg2_alignments_starts = [i[2] for i in hg2_alignments]
-            hg2_alignments_ends = [i[3] for i in hg2_alignments]
-            left_side_correction = ""
-            right_side_correction = ""
-            left_basepair_accuracy = ""
-            right_basepair_accuracy = ""
-            print("----------------------------------------------------------------")
-            print(f'Analyzing the DUP interval {self.dup_interval}({dup_interval_size}bp)')
-            print("----------------------------------------------------------------")
-            print("ANALYZING THE POS OF THE DUP INTERVAL")
-            print("----------------------------------------------------------------")
-            if max(hg2_alignments_starts)>1:
-                print(f"The called interval pos needs to be moved to the right by {max(hg2_alignments_starts)}bp")
-                left_side_correction = pos + max(hg2_alignments_starts)
-                left_basepair_accuracy = 1
-            elif min(hg2_alignments_starts)<=1:
-                print("The called interval pos needs to be checked by extend_2_left")
-                print("**Using extend_2_left to check the pos**")
-                interval_2_extend = create_interval(chr, pos + min(hg2_alignments_starts), end)
-                extend_2_left_interval, left_basepair_accuracy = extend_2_left(interval_2_extend, self.calling_reference_fasta, self.called_ref_aligner,
-                              self.truth_ref_aligner)
-                extend_2_left_chr, extend_2_left_pos, extend_2_left_end = parse_interval(extend_2_left_interval)
-                left_side_correction = int(extend_2_left_pos)
-            print("----------------------------------------------------------------")
-            print("ANALYZING THE END OF THE DUP INTERVAL")
-            print("----------------------------------------------------------------")
-            if min(hg2_alignments_ends)<dup_interval_size and hg2_alignments_ends.count(max(hg2_alignments_ends)) <= hg38_dup_count:
-                print(f"The called interval end needs to be moved to the left by {max(hg2_alignments_ends)-min(hg2_alignments_ends)}bp")
-                right_side_correction = pos + min(hg2_alignments_ends)
-                right_basepair_accuracy = 1
-            # If there are enough alignments to support the original interval end, then the end of the interval will not be moved
-            elif min(hg2_alignments_ends)<dup_interval_size and hg2_alignments_ends.count(max(hg2_alignments_ends)) > hg38_dup_count:
-                print(f"No need to move the called interval end to the left. Left movement might cause more alignments than expected")
-                right_side_correction = pos + max(hg2_alignments_ends)
-                right_basepair_accuracy = 1
-            elif max(hg2_alignments_ends)>=dup_interval_size:
-                print("The called interval end needs to be checked by extend_2_right")
-                print("**Using extend_2_right to check the end**")
-                interval_2_extend = create_interval(chr, pos, pos + max(hg2_alignments_ends))
-                extended_2_right_interval, right_basepair_accuracy = extend_2_right(interval_2_extend, self.calling_reference_fasta, self.called_ref_aligner,
-                               self.truth_ref_aligner)
-                extend_2_right_chr, extend_2_right_pos, extend_2_right_end = parse_interval(extended_2_right_interval)
-                right_side_correction = int(extend_2_right_end)
-
-            corrected_interval = create_interval(chr, left_side_correction, right_side_correction)
-            corrected_interval_size = interval_size(corrected_interval)
-            print("----------------------------------------------------------------")
-            print(f"Corrected Interval Details")
-            print("----------------------------------------------------------------")
-            print(f"The original interval is {self.dup_interval} ({dup_interval_size}bp)")
-            print(f"The corrected interval is {corrected_interval} ({corrected_interval_size}bp)")
-            extended_length = corrected_interval_size - dup_interval_size
-            print(f"The corrected interval is {extended_length}bp longer than the original interval")
-            print("----------------------------------------------------------------")
-            print("Alignment Report of Corrected Interval")
-            print("----------------------------------------------------------------")
-            corrected_hg38_dup_count, corrected_hg2_mat_count, corrected_hg2_pat_count, corrected_hg2_dup_count = reportAlignment(corrected_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner, print_alignments=True)
-            dup_summary_dict['corrected_interval'] = corrected_interval
-            dup_summary_dict['corrected_interval_size'] = corrected_interval_size
-            dup_summary_dict['expanded_length'] = extended_length
-            refined_hg38_alignments, refined_hg2_alignments = align_interval(corrected_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
-            corrected_dup_interval_classification = classifyDupInterval(corrected_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
-            corrected_interval_major_classification = corrected_dup_interval_classification[0]
-            corrected_interval_sub_classification = corrected_dup_interval_classification[1]
-            dup_summary_dict['corrected_hg38_hit_count'] = corrected_hg38_dup_count
-            dup_summary_dict['corrected_hg2_hit_count'] = corrected_hg2_dup_count
-            dup_summary_dict['corrected_hg2_mat_hit_count'] = corrected_hg2_mat_count
-            dup_summary_dict['corrected_hg2_pat_hit_count'] = corrected_hg2_pat_count
-            dup_summary_dict['corrected_dup_interval_major_classification'] = corrected_interval_major_classification
-            dup_summary_dict['corrected_dup_interval_sub_classification'] = corrected_interval_sub_classification
-            dup_summary_dict['corrected_pos_accuracy'] = left_basepair_accuracy
-            dup_summary_dict['corrected_end_accuracy'] = right_basepair_accuracy
+        # if major_classification == "Copy Neutral" or major_classification == "Unknown" or major_classification == "Reference Error" or big_gap_dup == True or dup_interval_size > 1000000:
+        #     print(f"The DUP interval's classification is {major_classification} and it will not be corrected")
+        #     # Assign the attributes associated with corrected interval to NA
+        #     dup_summary_dict['corrected_interval'] = np.nan
+        #     dup_summary_dict['corrected_interval_size'] = np.nan
+        #     dup_summary_dict['expanded_length'] = np.nan
+        #     dup_summary_dict['corrected_hg38_hit_count'] = np.nan
+        #     dup_summary_dict['corrected_hg2_hit_count'] = np.nan
+        #     dup_summary_dict['corrected_hg2_mat_hit_count'] = np.nan
+        #     dup_summary_dict['corrected_hg2_pat_hit_count'] = np.nan
+        #     dup_summary_dict['corrected_dup_interval_major_classification'] = np.nan
+        #     dup_summary_dict['corrected_dup_interval_sub_classification'] = np.nan
+        #     dup_summary_dict['corrected_pos_accuracy'] = np.nan
+        #     dup_summary_dict['corrected_end_accuracy'] = np.nan
+        # # If the DUP interval is not a false duplication, then it might need to be corrected
+        # else:
+        #     # Use hg2 alignments starts and ends to determine if the DUP interval needs to be adjusted
+        #     hg2_alignments_starts = [i[2] for i in hg2_alignments]
+        #     hg2_alignments_ends = [i[3] for i in hg2_alignments]
+        #     left_side_correction = ""
+        #     right_side_correction = ""
+        #     left_basepair_accuracy = ""
+        #     right_basepair_accuracy = ""
+        #     print("----------------------------------------------------------------")
+        #     print(f'Analyzing the DUP interval {self.dup_interval}({dup_interval_size}bp)')
+        #     print("----------------------------------------------------------------")
+        #     print("ANALYZING THE POS OF THE DUP INTERVAL")
+        #     print("----------------------------------------------------------------")
+        #     if max(hg2_alignments_starts)>1:
+        #         print(f"The called interval pos needs to be moved to the right by {max(hg2_alignments_starts)}bp")
+        #         left_side_correction = pos + max(hg2_alignments_starts)
+        #         left_basepair_accuracy = 1
+        #     elif min(hg2_alignments_starts)<=1:
+        #         print("The called interval pos needs to be checked by extend_2_left")
+        #         print("**Using extend_2_left to check the pos**")
+        #         interval_2_extend = create_interval(chr, pos + min(hg2_alignments_starts), end)
+        #         extend_2_left_interval, left_basepair_accuracy = extend_2_left(interval_2_extend, self.calling_reference_fasta, self.called_ref_aligner,
+        #                       self.truth_ref_aligner)
+        #         extend_2_left_chr, extend_2_left_pos, extend_2_left_end = parse_interval(extend_2_left_interval)
+        #         left_side_correction = int(extend_2_left_pos)
+        #     print("----------------------------------------------------------------")
+        #     print("ANALYZING THE END OF THE DUP INTERVAL")
+        #     print("----------------------------------------------------------------")
+        #     if min(hg2_alignments_ends)<dup_interval_size and hg2_alignments_ends.count(max(hg2_alignments_ends)) <= hg38_dup_count:
+        #         print(f"The called interval end needs to be moved to the left by {max(hg2_alignments_ends)-min(hg2_alignments_ends)}bp")
+        #         right_side_correction = pos + min(hg2_alignments_ends)
+        #         right_basepair_accuracy = 1
+        #     # If there are enough alignments to support the original interval end, then the end of the interval will not be moved
+        #     elif min(hg2_alignments_ends)<dup_interval_size and hg2_alignments_ends.count(max(hg2_alignments_ends)) > hg38_dup_count:
+        #         print(f"No need to move the called interval end to the left. Left movement might cause more alignments than expected")
+        #         right_side_correction = pos + max(hg2_alignments_ends)
+        #         right_basepair_accuracy = 1
+        #     elif max(hg2_alignments_ends)>=dup_interval_size:
+        #         print("The called interval end needs to be checked by extend_2_right")
+        #         print("**Using extend_2_right to check the end**")
+        #         interval_2_extend = create_interval(chr, pos, pos + max(hg2_alignments_ends))
+        #         extended_2_right_interval, right_basepair_accuracy = extend_2_right(interval_2_extend, self.calling_reference_fasta, self.called_ref_aligner,
+        #                        self.truth_ref_aligner)
+        #         extend_2_right_chr, extend_2_right_pos, extend_2_right_end = parse_interval(extended_2_right_interval)
+        #         right_side_correction = int(extend_2_right_end)
+        #
+        #     corrected_interval = create_interval(chr, left_side_correction, right_side_correction)
+        #     corrected_interval_size = interval_size(corrected_interval)
+        #     print("----------------------------------------------------------------")
+        #     print(f"Corrected Interval Details")
+        #     print("----------------------------------------------------------------")
+        #     print(f"The original interval is {self.dup_interval} ({dup_interval_size}bp)")
+        #     print(f"The corrected interval is {corrected_interval} ({corrected_interval_size}bp)")
+        #     extended_length = corrected_interval_size - dup_interval_size
+        #     print(f"The corrected interval is {extended_length}bp longer than the original interval")
+        #     print("----------------------------------------------------------------")
+        #     print("Alignment Report of Corrected Interval")
+        #     print("----------------------------------------------------------------")
+        #     corrected_hg38_dup_count, corrected_hg2_mat_count, corrected_hg2_pat_count, corrected_hg2_dup_count = reportAlignment(corrected_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner, print_alignments=True)
+        #     dup_summary_dict['corrected_interval'] = corrected_interval
+        #     dup_summary_dict['corrected_interval_size'] = corrected_interval_size
+        #     dup_summary_dict['expanded_length'] = extended_length
+        #     refined_hg38_alignments, refined_hg2_alignments = align_interval(corrected_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
+        #     corrected_dup_interval_classification = classifyDupInterval(corrected_interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
+        #     corrected_interval_major_classification = corrected_dup_interval_classification[0]
+        #     corrected_interval_sub_classification = corrected_dup_interval_classification[1]
+        #     dup_summary_dict['corrected_hg38_hit_count'] = corrected_hg38_dup_count
+        #     dup_summary_dict['corrected_hg2_hit_count'] = corrected_hg2_dup_count
+        #     dup_summary_dict['corrected_hg2_mat_hit_count'] = corrected_hg2_mat_count
+        #     dup_summary_dict['corrected_hg2_pat_hit_count'] = corrected_hg2_pat_count
+        #     dup_summary_dict['corrected_dup_interval_major_classification'] = corrected_interval_major_classification
+        #     dup_summary_dict['corrected_dup_interval_sub_classification'] = corrected_interval_sub_classification
+        #     dup_summary_dict['corrected_pos_accuracy'] = left_basepair_accuracy
+        #     dup_summary_dict['corrected_end_accuracy'] = right_basepair_accuracy
         print("----------------------------------------------------------------")
         print(f"End of Analysis of DUP interval {self.dup_interval}({dup_interval_size}bp)")
         print("----------------------------------------------------------------")
