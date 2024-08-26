@@ -1,0 +1,10 @@
+name: T2T_ACE_env
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.10.13
+  - pandas=2.1.1
+  - mappy=2.26
+  - numpy=1.26.0
+  - matplotlib=3.8.0
