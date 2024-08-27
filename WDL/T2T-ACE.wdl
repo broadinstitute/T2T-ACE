@@ -14,7 +14,9 @@ workflow T2T_ACE{
             SampleName = SampleName,
             CNV_VCF = CNV_VCF,
             T2T_Reference = T2T_Reference,
-            hg38_Reference = hg38_Reference
+            hg38_Reference = hg38_Reference,
+            DEL_bed = DEL_bed,
+            DUP_bed = DUP_bed
     }
     output {
         File? DEL_eval = T2T_ACE.DEL_eval_sum
@@ -41,17 +43,18 @@ task T2T_ACE {
         Int disk_space_gb = 500
     }
     command <<<
-    set -e
-    conda run --no-capture-output -n T2T_ACE_env python3 /BaseImage/T2T-ACE/run_T2T-ACE.py \
-    ~{'--cnv_vcf '+ CNV_VCF} \
-    ~{'--del_txt'+ DEL_bed} \
-    ~{'--dup_txt'+ DUP_bed} \
-    --t2t_ref ~{T2T_Reference} \
-    --hg38_ref ~{hg38_Reference} \
-    --test
+        set -e
 
-    mv output_DEL_eval_sum.csv ~{SampleName}_DEL_eval_sum.csv
-    mv output_DUP_eval_sum.csv ~{SampleName}_DUP_eval_sum.csv
+        conda run --no-capture-output -n T2T_ACE_env python3 /BaseImage/T2T-ACE/run_T2T-ACE.py \
+        ~{'--cnv_vcf '+ CNV_VCF} \
+        ~{'--del_txt '+ DEL_bed} \
+        ~{'--dup_txt '+ DUP_bed} \
+        --t2t_ref ~{T2T_Reference} \
+        --hg38_ref ~{hg38_Reference} \
+        --test True
+
+        mv output_DEL_eval_sum.csv ~{SampleName}_DEL_eval_sum.csv
+        mv output_DUP_eval_sum.csv ~{SampleName}_DUP_eval_sum.csv
 
     >>>
     output {
