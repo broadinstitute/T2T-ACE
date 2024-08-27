@@ -1,0 +1,18 @@
+version: 1.2
+workflows:
+   - name: T2T-ACE
+     subclass: WDL
+     primaryDescriptorPath: /WDL/T2T-ACE.wdl
+     testParameterFiles:
+     -  /WDL/T2T-ACE.inputs.json
+     readMePath: /README.md
+     authors:
+       - name: Yueyao Gao
+         email: gaoyueya@broadinstitute.org
+         role: Developer
+         affiliation: Broad Institute
+         orcid: 0000-0002-7607-2938
+       - name: Mark Fleharty
+         email: fleharty@broadinstitute.org
+         role: Developer
+         affiliation: Broad Institute

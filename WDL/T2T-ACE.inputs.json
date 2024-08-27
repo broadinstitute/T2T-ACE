@@ -1,0 +1,15 @@
+{
+  "T2T_ACE.DUP_bed": "File? (optional)",
+  "T2T_ACE.CNV_VCF": "File? (optional)",
+  "T2T_ACE.T2T_ACE.cpu": "Int (optional, default = 8)",
+  "T2T_ACE.T2T_ACE.disk_space_gb": "Int (optional, default = 500)",
+  "T2T_ACE.T2T_ACE.DUP_bed": "File? (optional)",
+  "T2T_ACE.SampleName": "String",
+  "T2T_ACE.T2T_ACE.memory": "Int (optional, default = 64)",
+  "T2T_ACE.T2T_ACE.docker": "String (optional, default = \"us.gcr.io/tag-public/t2t-ace:0.0.0\")",
+  "T2T_ACE.T2T_ACE.DEL_bed": "File? (optional)",
+  "T2T_ACE.DEL_bed": "File? (optional)",
+  "T2T_ACE.T2T_Reference": "File",
+  "T2T_ACE.hg38_Reference": "File"
+}
+
