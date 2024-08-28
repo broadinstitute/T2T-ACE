@@ -64,7 +64,7 @@ task T2T_ACE {
     }
     runtime{
         docker: docker
-        memory: memory
+        memory: memory + " GB"
         cpu: cpu
         disk: "local-disk " + disk_space_gb + " SSD"
         preemptible: preemptible
