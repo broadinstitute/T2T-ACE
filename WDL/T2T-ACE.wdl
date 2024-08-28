@@ -41,6 +41,7 @@ task T2T_ACE {
         Int memory = 64
         Int cpu = 8
         Int disk_space_gb = 500
+        Int preemptible = 3
     }
     command <<<
         set -e
@@ -66,6 +67,7 @@ task T2T_ACE {
         memory: memory
         cpu: cpu
         disk: "local-disk " + disk_space_gb + " SSD"
+        preemptible: preemptible
     }
 }
 
