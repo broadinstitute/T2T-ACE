@@ -54,13 +54,17 @@ task T2T_ACE {
         --hg38_ref ~{hg38_Reference} \
         --test True
 
-        mv output_DEL_eval_sum.csv ~{SampleName}_DEL_eval_sum.csv
-        mv output_DUP_eval_sum.csv ~{SampleName}_DUP_eval_sum.csv
+        if [ -f output_DEL_eval_sum.csv ]; then
+            mv output_DEL_eval_sum.csv ~{SampleName}_DEL_eval_sum.csv
+        fi
+        if [ -f output_DUP_eval_sum.csv ]; then
+            mv output_DUP_eval_sum.csv ~{SampleName}_DUP_eval_sum.csv
+        fi
 
     >>>
     output {
-        File DEL_eval_sum = "~{SampleName}_DEL_eval_sum.csv"
-        File DUP_eval_sum = "~{SampleName}_DUP_eval_sum.csv"
+        File? DEL_eval_sum = "~{SampleName}_DEL_eval_sum.csv"
+        File? DUP_eval_sum = "~{SampleName}_DUP_eval_sum.csv"
     }
     runtime{
         docker: docker
