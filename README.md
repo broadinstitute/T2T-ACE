@@ -11,7 +11,7 @@ python3 T2T_ACE/run_T2T-ACE.py --cnv_vcf <cnv_vcf> --t2t_ref <t2t_assembly.fa> -
 ## Download Assembly Files
 The T2T assembly and the hg38 assembly can be downloaded from the following links:
 * [GENCODE](https://www.gencodegenes.org/human/) hg38 primary assembly: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_46/GRCh38.primary_assembly.genome.fa.gz
-* [HG002](https://github.com/marbl/HG002) T2T assembly: https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/HG002/assemblies/hg002v1.0.1.fasta.gz
+* [HG002](https://github.com/marbl/HG002) T2T assembly v1.1: https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/HG002/assemblies/hg002v1.1.fasta.gz
 
 
 ## Design Description
@@ -41,3 +41,7 @@ separate chromosomes from the original call on hg38.
 - **Hom DUP Example:** ![DUP](docs/Hom_DUP_example.png)
 - **Het DUP Example:** ![DUP](docs/Het_DUP_example.png)
 - **FP DUP Example:** ![DUP](docs/FP_DUP_biallelic_copy_neutral_example.png)
+
+## Notes
+Not all FP CNV calls are due to errors in the CNV calling algorithm. Some FP CNV calls are due to the limitations of hg38 reference genome.
+
