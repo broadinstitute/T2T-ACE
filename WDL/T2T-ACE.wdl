@@ -38,6 +38,7 @@ task T2T_ACE {
         File T2T_Reference
         File hg38_Reference
         String docker = "us.gcr.io/tag-public/t2t-ace:0.0.0"
+        String test = false
         Int memory = 64
         Int cpu = 8
         Int disk_space_gb = 500
@@ -52,7 +53,7 @@ task T2T_ACE {
         ~{'--dup_txt '+ DUP_bed} \
         --t2t_ref ~{T2T_Reference} \
         --hg38_ref ~{hg38_Reference} \
-        --test True
+        --test ~{test}
 
         if [ -f output_DEL_eval_sum.csv ]; then
             mv output_DEL_eval_sum.csv ~{SampleName}_DEL_eval_sum.csv
