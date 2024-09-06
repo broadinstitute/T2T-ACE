@@ -1,4 +1,4 @@
-# T2T-ACE
+# T2T-ACE (beta version)
  *A*ccurate *C*NV *E*valuation Using Telomere-to-Telomere Assemblies
  
 ## Run T2T-ACE
