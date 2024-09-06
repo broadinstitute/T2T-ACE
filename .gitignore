@@ -7,3 +7,4 @@ notebooks/*.fasta
 notebooks/*.csv
 .idea
 resources/centromeres.txt
+notebooks

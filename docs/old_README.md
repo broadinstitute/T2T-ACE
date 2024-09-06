@@ -1,18 +1,24 @@
-# T2T-ACE (beta version)
+# T2T-ACE
  *A*ccurate *C*NV *E*valuation Using Telomere-to-Telomere Assemblies
- 
-## Run T2T-ACE
-This tool is designed to evaluate the accuracy of CNV calls using the T2T assembly as a reference. 
-The tool will align the CNV calls to the T2T assembly and the hg38 assembly and compare the alignment results. 
-```
-python3 T2T_ACE/run_T2T-ACE.py --cnv_vcf <cnv_vcf> --t2t_ref <t2t_assembly.fa> --hg38_ref <hg38_assembly.fa>
-```
+![T2T-ACE-logo](docs/logo.png)
 
-## Download Assembly Files
-The T2T assembly and the hg38 assembly can be downloaded from the following links:
-* [GENCODE](https://www.gencodegenes.org/human/) hg38 primary assembly: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_46/GRCh38.primary_assembly.genome.fa.gz
-* [HG002](https://github.com/marbl/HG002) T2T assembly v1.1: https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/HG002/assemblies/hg002v1.1.fasta.gz
 
+## About T2T-ACE
+
+T2T-ACE goes beyond conventional CNV assessment methods. It harnesses telomere-to-telomere assemblies to evaluate CNVs with unmatched precision. This innovative tool utilizes alignment-based techniques, enabling researchers to:
+
+- Determine the correctness of CNV events.
+- Identify the precise locations of CNVs.
+- Genotype CNV events of interest.
+
+## Key Features
+
+- **Unparalleled Accuracy:** T2T-ACE uses comprehensive telomere-to-telomere assemblies to ensure reliable CNV evaluation.
+
+- **Precision Matters:** T2T-ACE can suggest the exact locations of CNV events, providing critical insights 
+that can inform mathods or filteting strategies of your CNV caller
+
+- **Genotyping Capability:** Not only can you validate CNV events, but you can also determine their genotypes.
 
 ## Design Description
 ### DEL evaluation
@@ -24,7 +30,7 @@ By calculating the distance between the left and right flanking regions are alig
 ![DEL](docs/DEL_eval_logic.png)
 - **Het DEL Example:** ![DEL](docs/Het_DEL_example.png)
 - **Hom DEL Example:** ![DEL](docs/Hom_DEL_example.png)
-- **FP DEL Example:** ![DEL](docs/FP_DEL_example2.png)
+- **FP DEL Example:** ![DEL](docs/FP_DEL_example.png)
 
 ### DUP evaluation
 T2T-ACE align the DUP variant called in reference genome (hg38) to the HG002-T2T reference. T2T-ACE aligns the DNA sequence 
@@ -40,8 +46,5 @@ also allows us to identify the precise number, locations, and genotype of duplic
 separate chromosomes from the original call on hg38.
 - **Hom DUP Example:** ![DUP](docs/Hom_DUP_example.png)
 - **Het DUP Example:** ![DUP](docs/Het_DUP_example.png)
-- **FP DUP Example:** ![DUP](docs/FP_DUP_biallelic_copy_neutral_example.png)
-
-## Notes
-Not all FP CNV calls are due to errors in the CNV calling algorithm. Some FP CNV calls are due to the limitations of hg38 reference genome.
+- **Basepair-level Correction:** ![DUP](docs/dup_interval_correction_example.png)
 

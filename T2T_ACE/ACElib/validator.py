@@ -2,19 +2,20 @@ import logging
 import numpy as np
 import pandas as pd
 import mappy
-
-from T2T_ACE.interval_parsing import create_interval
-from T2T_ACE.genomic_queries import get_sequence_from_interval, get_flanking_regions, get_region_around_deletion
-from T2T_ACE.interval_parsing import (parse_interval, find_next_interval, find_previous_interval,
+from . import alignment_utilities as au
+from . import alignment_visualization_utilities as avu
+import sys
+import os
+from.interval_parsing import create_interval
+from.genomic_queries import get_sequence_from_interval, get_flanking_regions, get_region_around_deletion
+from.interval_parsing import (parse_interval, find_next_interval, find_previous_interval,
                                       distance_between_intervals, interval_between_intervals, interval_within_interval,
                                       interval_size, get_reversed_sequence, interval_overlapping_percentage)
-import T2T_ACE.alignment_utilities as au
-import T2T_ACE.alignment_visualization_utilities as avu
-import sys
 
 # Load the chromosome sizes
-chrom_size_path = "../resources/hg38_chrom_size.txt"
-chrom_size_df = pd.read_csv(chrom_size_path, sep='\t', header=None, names=['chr', 'size'])
+current_dir = os.path.dirname(os.path.abspath(__file__))
+hg38_chrom_size_filepath = os.path.join(current_dir, 'resources/hg38_chrom_size.txt')
+chrom_size_df = pd.read_csv(hg38_chrom_size_filepath, sep='\t', header=None, names=['chr', 'size'])
 chrom_size_dict = {row['chr']: row['size'] for index, row in chrom_size_df.iterrows()}
 
 def log_error(level, msg, *args):
@@ -527,7 +528,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                           right_flanking_hg2_alignment_intervals)
                     distance_between_flankings = distance_between_intervals(left_flanking_interval,
                                                                               matching_right_flanking_interval)
-                    interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    if distance_between_flankings > 0:
+                        interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    else:
+                        interval_between_matching_flankings = None
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("POS")
                     left_aligned_interval_list.append(left_flanking_interval)
@@ -544,7 +548,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                               right_flanking_hg2_alignment_intervals)
                     distance_between_flankings = distance_between_intervals(left_flanking_interval,
                                                                               matching_right_flanking_interval)
-                    interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    if distance_between_flankings > 0:
+                        interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    else:
+                        interval_between_matching_flankings = None
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("NEG")
                     left_aligned_interval_list.append(left_flanking_interval)
@@ -569,7 +576,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                                 right_flanking_hg2_alignment_intervals)
                     distance_between_flankings = distance_between_intervals(left_flanking_interval,
                                                                               matching_right_flanking_interval)
-                    interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    if distance_between_flankings > 0:
+                        interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    else:
+                        interval_between_matching_flankings = None
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("POS")
                     left_aligned_interval_list.append(left_flanking_interval)
@@ -586,7 +596,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                                                                               right_flanking_hg2_alignment_intervals)
                     distance_between_flankings = distance_between_intervals(left_flanking_interval,
                                                                               matching_right_flanking_interval)
-                    interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    if distance_between_flankings > 0:
+                        interval_between_matching_flankings = interval_between_intervals(left_flanking_interval, matching_right_flanking_interval)
+                    else:
+                        interval_between_matching_flankings = None
                     distance_between_flankings_list.append(distance_between_flankings)
                     flanking_connection_strand_list.append("NEG")
                     left_aligned_interval_list.append(left_flanking_interval)
@@ -606,65 +619,80 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
                     interval_between_matching_flankings_list.append(None)
                     print(f"No matching right flanking interval for {left_flanking_interval}")
 
+    distance_between_flankings_list = [i for i in distance_between_flankings_list if i != None]
+    flanking_connection_strand_list = [i for i in flanking_connection_strand_list if i != None]
     # Add the distance between the flanking regions' alignments and strand to the dictionary
     del_flankings_sum_dict['distance_between_flankings'] = distance_between_flankings_list
     del_flankings_sum_dict['flanking_connection_strand'] = flanking_connection_strand_list
     del_flankings_sum_dict['hg38_plotting_flanking_intervals'] = [del_interval, hg38_left_flanking_interval, hg38_right_flanking_interval]
     del_flankings_sum_dict['hg2_plotting_flanking_intervals'] = left_aligned_interval_list + right_aligned_interval_list
+    print("PRINTING DISTANCE BETWEEN FLANKINGS LIST")
+    print(distance_between_flankings_list)
 
     # Use the obtained details about the flanking regions to classify the DEL interval
     if len(left_flanking_hg38_alignment_intervals) > 1 and len(right_flanking_hg38_alignment_intervals) > 1 and len(distance_between_flankings_list) > 2:
-        if distance_between_flankings_list.count(None) != len(distance_between_flankings_list) and min(distance_between_flankings_list) <= del_interval_size * 0.5:
+        if len(distance_between_flankings_list)>0 and min(distance_between_flankings_list) <= del_interval_size * 0.5:
             major_classification = 'DEL'
             minor_classification = 'DEL in DUP'
         else:
             major_classification = 'False DEL'
             minor_classification = 'False DEL'
-            print('----------- Checking DEL Sequence Alignment in HG2 -----------')
+            interval_between_matching_flankings_list = [interval for interval in interval_between_matching_flankings_list if interval != None]
+            # print(interval_between_matching_flankings_list)
+            print('----------- Checking DEL Sequence Alignment in HG2-----------')
             for distance_interval in interval_between_matching_flankings_list:
-                distance_interval_chr, distance_interval_start, distance_interval_end = parse_interval(
-                    distance_interval)
-                for del_hg2_seq in del_seq_hg2_alignment_intervals:
-                    del_hg2_chr, del_hg2_start, del_hg2_end = parse_interval(del_hg2_seq)
-                    if distance_interval_chr == del_hg2_chr:
-                        if min(interval_overlapping_percentage(distance_interval, del_hg2_seq)) > 0:
-                            print(f"DEL HG2 alignment:{del_hg2_seq}; Interval Between HG2 Aligned Flankings:{distance_interval}; Overlapping:{interval_overlapping_percentage(distance_interval, del_hg2_seq)}")
-    else:
-        if distance_between_flankings_list.count(None) != len(distance_between_flankings_list):
-            if None in distance_between_flankings_list:
-                distance_between_flankings_list.remove(None)
-            del_flanking_dist_list = [distance for distance in distance_between_flankings_list if (distance <= del_interval_size * 0.5)]
-            if len(distance_between_flankings_list) == len(del_flanking_dist_list):
-                if del_chrom != 'chrX' or del_chrom != 'chrY':
-                    if len(del_flanking_dist_list) == 2:
-                        major_classification = 'DEL'
-                        minor_classification = 'Homozygous DEL'
-                    elif len(del_flanking_dist_list) == 1:
-                        major_classification = 'DEL'
-                        minor_classification = 'Heterozygous DEL'
-                    else:
-                        major_classification = 'DEL'
-                        minor_classification = 'Unclassified DEL'
-                else:
-                    major_classification = 'DEL'
-                    minor_classification = 'Heterozygous DEL'
-            elif len(distance_between_flankings_list) > len(del_flanking_dist_list) and len(del_flanking_dist_list) > 0:
-                major_classification = 'DEL'
-                minor_classification = 'Heterozygous DEL'
-            else:
-                major_classification = 'False DEL'
-                minor_classification = 'False DEL'
-                print('----------- Checking DEL Sequence Alignment in HG2 -----------')
-                for distance_interval in interval_between_matching_flankings_list:
-                    distance_interval_chr, distance_interval_start, distance_interval_end = parse_interval(distance_interval)
-                    for del_hg2_seq in  del_seq_hg2_alignment_intervals:
+                    distance_interval_chr, distance_interval_start, distance_interval_end = parse_interval(
+                        distance_interval)
+                    for del_hg2_seq in del_seq_hg2_alignment_intervals:
                         del_hg2_chr, del_hg2_start, del_hg2_end = parse_interval(del_hg2_seq)
                         if distance_interval_chr == del_hg2_chr:
-                            if min(interval_overlapping_percentage(distance_interval, del_hg2_seq)) >0:
-                                print(f"DEL HG2 alignment:{del_hg2_seq}; Interval Between HG2 Aligned Flankings:{distance_interval}; Overlapping:{interval_overlapping_percentage(distance_interval, del_hg2_seq)}")
+                            if min(interval_overlapping_percentage(distance_interval, del_hg2_seq)) > 0:
+                                overlap_to_distance_between_flankings, overlap_to_del_seq = interval_overlapping_percentage(distance_interval, del_hg2_seq)
+                                print(f"DEL HG2 alignment:{del_hg2_seq}; Interval Between HG2 Aligned Flankings:{distance_interval}\nThe overlap between the DEL sequence and the interval between the HG2 aligned flankings is {overlap_to_del_seq} of the DEL sequence and {overlap_to_distance_between_flankings} of the interval between the HG2 aligned flankings")
+    else:
+        del_flanking_dist_list = [distance for distance in distance_between_flankings_list if (distance <= del_interval_size * 0.5)]
+        print("PRINTING DEL FLANKING DISTANCE LIST")
+        print(del_flanking_dist_list)
+        if len(distance_between_flankings_list) == len(del_flanking_dist_list) and len(del_flanking_dist_list) > 0:
+            if del_chrom != 'chrX' or del_chrom != 'chrY':
+                if len(del_flanking_dist_list) == 2:
+                    major_classification = 'DEL'
+                    minor_classification = 'Homozygous DEL'
+                elif len(del_flanking_dist_list) == 1:
+                    major_classification = 'DEL'
+                    minor_classification = 'Heterozygous DEL'
+                else:
+                    major_classification = 'DEL'
+                    minor_classification = 'Unclassified DEL'
+            else:
+                major_classification = 'DEL'
+                minor_classification = 'Heterozygous DEL'
+        elif len(distance_between_flankings_list) > len(del_flanking_dist_list) and len(del_flanking_dist_list) > 0:
+            major_classification = 'DEL'
+            minor_classification = 'Heterozygous DEL'
+        elif len(distance_between_flankings_list) == 1 and len(del_flanking_dist_list) == 0:
+            major_classification = 'False DEL'
+            minor_classification = 'Potential SV'
         else:
-            major_classification = 'Unknown'
-            minor_classification = 'Unknown'
+            major_classification = 'False DEL'
+            minor_classification = 'False DEL'
+            interval_between_matching_flankings_list = [interval for interval in interval_between_matching_flankings_list if interval != None]
+            # print(interval_between_matching_flankings_list)
+            print('----------- Checking DEL Sequence Alignment in HG2 -----------')
+            for distance_interval in interval_between_matching_flankings_list:
+                distance_interval_chr, distance_interval_start, distance_interval_end = parse_interval(distance_interval)
+                for del_hg2_seq in  del_seq_hg2_alignment_intervals:
+                    del_hg2_chr, del_hg2_start, del_hg2_end = parse_interval(del_hg2_seq)
+                    if distance_interval_chr == del_hg2_chr:
+                        if min(interval_overlapping_percentage(distance_interval, del_hg2_seq)) >0:
+                            overlap_to_distance_between_flankings, overlap_to_del_seq = interval_overlapping_percentage(
+                                distance_interval, del_hg2_seq)
+                            print(
+                                f"DEL HG2 alignment:{del_hg2_seq}; Interval Between HG2 Aligned Flankings:{distance_interval}\nThe overlap between the DEL sequence and the interval between the HG2 aligned flankings is {overlap_to_del_seq} of the DEL sequence and {overlap_to_distance_between_flankings} of the interval between the HG2 aligned flankings")
+                            # print(f"DEL HG2 alignment:{del_hg2_seq}; Interval Between HG2 Aligned Flankings:{distance_interval}; Overlapping:{interval_overlapping_percentage(distance_interval, del_hg2_seq)}")
+            # else:
+            #     major_classification = 'Unknown'
+            #     minor_classification = 'Unknown'
 
     # Add the classification to the dictionary
     del_flankings_sum_dict['classification'] = major_classification

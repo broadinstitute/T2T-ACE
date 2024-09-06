@@ -6,7 +6,7 @@ from collections import Counter
 import re
 
 from typing import List
-from Bio.Align.Applications import MafftCommandline
+# from Bio.Align.Applications import MafftCommandline
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -152,25 +152,25 @@ def sum_cigar_events(cigar_str: str) -> str:
 
     return aggregated_cigar_str
 
-def get_multiseq_alignment(seq_list, seq_names):
-    multiseq_fasta = f"{seq_names[0]}_intervals.fasta"
-    multiseq_aligned_file = f"{seq_names[0]}_intervals_mafft_aligned.fasta"
-
-    # Remove old files if they exist
-    if os.path.exists(multiseq_fasta):
-        os.remove(multiseq_fasta)
-    elif os.path.exists(multiseq_aligned_file):
-        os.remove(multiseq_aligned_file)
-
-    # Start new aLignment
-    # Get the sequences in FASTA format
-    for seq, name in zip(seq_list, seq_names):
-        with open(multiseq_fasta, "a") as f:
-            f.write(f">{name}\n{seq}\n")
-    # Perform multiseq alignment using MAFFT
-    print(f"Running MAFFT alignment for {multiseq_fasta}")
-    mafft_cline = MafftCommandline(input=multiseq_fasta, clustalout="on")
-    mafft_cline(stdout=multiseq_aligned_file)
+# def get_multiseq_alignment(seq_list, seq_names):
+#     multiseq_fasta = f"{seq_names[0]}_intervals.fasta"
+#     multiseq_aligned_file = f"{seq_names[0]}_intervals_mafft_aligned.fasta"
+#
+#     # Remove old files if they exist
+#     if os.path.exists(multiseq_fasta):
+#         os.remove(multiseq_fasta)
+#     elif os.path.exists(multiseq_aligned_file):
+#         os.remove(multiseq_aligned_file)
+#
+#     # Start new aLignment
+#     # Get the sequences in FASTA format
+#     for seq, name in zip(seq_list, seq_names):
+#         with open(multiseq_fasta, "a") as f:
+#             f.write(f">{name}\n{seq}\n")
+#     # Perform multiseq alignment using MAFFT
+#     print(f"Running MAFFT alignment for {multiseq_fasta}")
+#     mafft_cline = MafftCommandline(input=multiseq_fasta, clustalout="on")
+#     mafft_cline(stdout=multiseq_aligned_file)
 
 
 
