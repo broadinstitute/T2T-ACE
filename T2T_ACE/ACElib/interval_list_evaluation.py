@@ -1,9 +1,12 @@
 import pandas as pd
+import gzip
 from .duplication_evaluation import eval_dup_interval
 from . import validator as v
 
 def read_vcf(vcf_path):
-    with open(vcf_path) as f:
+    # Check if the VCF file is gzipped
+    open_func = gzip.open if vcf_path.endswith('.gz') else open
+    with open_func(vcf_path) as f:
         for line in f:
             if line.startswith("#CHROM"):
                 vcf_header_names = line.strip().split('\t')
