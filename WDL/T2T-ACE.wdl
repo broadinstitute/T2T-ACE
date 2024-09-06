@@ -47,13 +47,20 @@ task T2T_ACE {
     command <<<
         set -e
 
+        if ~{test} == true; then
+            TEST_MODE=True
+            echo "Running in test mode"
+        else
+            TEST_MODE=False
+        fi
+
         conda run --no-capture-output -n T2T_ACE_env python3 /BaseImage/T2T-ACE/run_T2T-ACE.py \
         ~{'--cnv_vcf '+ CNV_VCF} \
         ~{'--del_txt '+ DEL_bed} \
         ~{'--dup_txt '+ DUP_bed} \
         --t2t_ref ~{T2T_Reference} \
         --hg38_ref ~{hg38_Reference} \
-        --test ~{test}
+        --test TEST_MODE
 
         if [ -f output_DEL_eval_sum.csv ]; then
             mv output_DEL_eval_sum.csv ~{SampleName}_DEL_eval_sum.csv
