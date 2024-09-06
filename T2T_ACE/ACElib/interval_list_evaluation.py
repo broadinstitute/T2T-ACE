@@ -6,7 +6,7 @@ from . import validator as v
 def read_vcf(vcf_path):
     # Check if the VCF file is gzipped
     open_func = gzip.open if vcf_path.endswith('.gz') else open
-    with open_func(vcf_path) as f:
+    with open_func(vcf_path, 'rt') as f:
         for line in f:
             if line.startswith("#CHROM"):
                 vcf_header_names = line.strip().split('\t')
