@@ -3,14 +3,16 @@ version 1.0
 workflow T2T_ACE{
     input {
         String SampleName
-        File CNV_VCF
+        File CNV_Input
+        String InputType
         File T2T_Reference
         File hg38_Reference
     }
     call T2T_ACE {
         input:
             SampleName = SampleName,
-            CNV_VCF = CNV_VCF,
+            CNV_Input = CNV_Input,
+            InputType = InputType,
             T2T_Reference = T2T_Reference,
             hg38_Reference = hg38_Reference
     }
@@ -28,7 +30,8 @@ workflow T2T_ACE{
 task T2T_ACE {
     input {
         String SampleName
-        File CNV_VCF
+        File CNV_Input
+        String InputType
         File T2T_Reference
         File hg38_Reference
         String docker = "us.gcr.io/tag-public/t2t-ace:0.0.0"
@@ -41,10 +44,22 @@ task T2T_ACE {
     command <<<
         set -e
 
-        conda run --no-capture-output -n T2T_ACE_env python3 /BaseImage/T2T-ACE/run_T2T-ACE.py \
-        --cnv_vcf  ~{CNV_VCF} \
-        --t2t_ref ~{T2T_Reference} \
-        --hg38_ref ~{hg38_Reference}
+        if [ "~{InputType}" == "VCF" ]; then
+            echo "Processing VCF file: ~{CNV_Input}"
+            conda run --no-capture-output -n T2T_ACE_env python3 /BaseImage/T2T-ACE/run_T2T-ACE.py \
+            --cnv_vcf ~{CNV_Input} \
+            --t2t_ref ~{T2T_Reference} \
+            --hg38_ref ~{hg38_Reference}
+        elif [ "~{InputType}" == "BED" ]; then
+            echo "Processing BED file: ~{CNV_Input}"
+            conda run --no-capture-output -n T2T_ACE_env python3 /BaseImage/T2T-ACE/run_T2T-ACE.py \
+            --cnv_bed ~{CNV_Input} \
+            --t2t_ref ~{T2T_Reference} \
+            --hg38_ref ~{hg38_Reference}
+        else
+            echo "Invalid input type: ~{InputType}"
+            exit 1
+        fi
 
         if [ -f output_DEL_eval_sum.csv ]; then
             mv output_DEL_eval_sum.csv ~{SampleName}_DEL_eval_sum.csv
