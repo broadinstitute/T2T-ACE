@@ -39,8 +39,6 @@ if vcf_path:
             del_pass_intervals.append(interval)
         elif row['ALT'] == '<DUP>' and row['FILTER'] == 'PASS':
             dup_pass_intervals.append(interval)
-    print('Number of DEL intervals within the Input VCF:', len(del_pass_intervals))
-    print('Number of DEL intervals within the Input VCF:', len(dup_pass_intervals))
 
 elif args.bed_path:
    # Get the CNV calls from the input BED file
@@ -50,13 +48,17 @@ elif args.bed_path:
            chrom, start, end, svtype =line.split('\t')
            interval = chrom + ':' + start + '-' + end
            if svtype == 'DEL':
+               print('DEL:', interval)
                del_pass_intervals.append(interval)
            elif svtype == 'DUP':
+                print('DUP:', interval)
                dup_pass_intervals.append(interval)
 
 else:
     raise ValueError("Please provide either the VCF file OR a BED file containing the DEL and DUP coordinates.")
 
+print('Number of DEL intervals within the Input VCF:', len(del_pass_intervals))
+print('Number of DEL intervals within the Input VCF:', len(dup_pass_intervals))
 print('Loading the reference genomes...')
 # Load the minimap2 aligner from reference fasta file
 # Load HG002 T2T reference
