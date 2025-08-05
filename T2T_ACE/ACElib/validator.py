@@ -459,10 +459,10 @@ def collect_del_flankings(del_interval, calling_reference_fasta: str, called_ref
         right_flanking_end = del_end + flanking_size
         if right_flanking_end >= chrom_size_dict[del_chrom]:
             print("Extension exceeds the length of the chromosome")
-            break
+            return None
         if left_flanking_pos < 0:
             print("Extension exceeds the length of the chromosome")
-            break
+            return None
         hg38_left_flanking_interval = create_interval(del_chrom, left_flanking_pos, left_flanking_end)
         hg38_right_flanking_interval = create_interval(del_chrom, right_flanking_pos, right_flanking_end)
 

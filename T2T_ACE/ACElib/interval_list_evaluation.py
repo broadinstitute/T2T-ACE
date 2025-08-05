@@ -99,6 +99,8 @@ class eval_interval_list:
         for interval in self.interval_list:
             print(interval)
             sum_dict = v.collect_del_flankings(interval, self.calling_reference_fasta, self.called_ref_aligner, self.truth_ref_aligner)
+            if sum_dict is None:
+                continue
             del_interval_list.append(sum_dict['del_interval'])
             del_interval_size_list.append(sum_dict['del_interval_size'])
             flanking_size_list.append(sum_dict['flanking_size'])
