@@ -9,6 +9,7 @@ argparser.add_argument('-v', "--cnv_vcf", dest="cnv_vcf_path", help="Path to CNV
 argparser.add_argument('-t2t', "--t2t_ref", dest="t2t_ref", help="Path to T2T reference genome.", required=True)
 argparser.add_argument('-hg38', "--hg38_ref", dest="hg38_ref", help="Path to hg38 reference genome.", required=True)
 argparser.add_argument('-o', '--output', dest='output_path', help='Path to the output directory.', required=False)
+argparser.add_argument('-b', '--cnv_bed', dest='bed_path', help='Path to the BED file containing the list of DEL and DUP intervals.', required=False)
 
 args = argparser.parse_args()
 
@@ -38,11 +39,26 @@ if vcf_path:
             del_pass_intervals.append(interval)
         elif row['ALT'] == '<DUP>' and row['FILTER'] == 'PASS':
             dup_pass_intervals.append(interval)
-    print('Number of DEL intervals within the Input VCF:', len(del_pass_intervals))
-    print('Number of DEL intervals within the Input VCF:', len(dup_pass_intervals))
-else:
-    raise ValueError("Please provide either the VCF file containing the list of DEL and DUP intervals.")
 
+elif args.bed_path:
+   # Get the CNV calls from the input BED file
+   bed_path = args.bed_path
+   with open(bed_path, 'r') as f:
+       for line in f:
+           chrom, start, end, svtype =line.split('\t')
+           interval = chrom + ':' + start + '-' + end
+           if svtype == 'DEL':
+               print('DEL:', interval)
+               del_pass_intervals.append(interval)
+           elif svtype == 'DUP':
+                print('DUP:', interval)
+               dup_pass_intervals.append(interval)
+
+else:
+    raise ValueError("Please provide either the VCF file OR a BED file containing the DEL and DUP coordinates.")
+
+print('Number of DEL intervals within the Input VCF:', len(del_pass_intervals))
+print('Number of DEL intervals within the Input VCF:', len(dup_pass_intervals))
 print('Loading the reference genomes...')
 # Load the minimap2 aligner from reference fasta file
 # Load HG002 T2T reference
